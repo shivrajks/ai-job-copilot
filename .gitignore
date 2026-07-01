@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+target/
+build/
+dist/
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build outputs
+.next/
+out/
+*.class
+*.tsbuildinfo
+
+# Maven
+.mvn/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Runtime data (user file uploads)
+uploads/
+
+# Local config
+application-local.yml
+application-dev.yml
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+test.txt

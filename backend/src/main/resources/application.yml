@@ -1,0 +1,90 @@
+spring:
+  application:
+    name: ai-job-copilot
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:aicopilot}
+    username: ${DB_USERNAME:aicopilot}
+    password: ${DB_PASSWORD:aicopilot}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+
+# JWT Configuration
+jwt:
+  # Required: set JWT_SECRET to a non-default 256-bit+ signing secret.
+  secret: ${JWT_SECRET}
+  access-token-expiration: 900000    # 15 minutes
+  refresh-token-expiration: 604800000 # 7 days
+
+# Gemini AI Configuration
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  flash-model: gemini-2.0-flash
+  pro-model: gemini-1.5-pro
+
+# Rate Limiting
+rate-limit:
+  free-tier:
+    requests-per-month: 5
+  pro-tier:
+    requests-per-month: 10000
+
+# Resume Storage
+resume:
+  storage:
+    path: ${RESUME_STORAGE_PATH:./uploads/resumes}
+  max-file-size: 5242880  # 5MB in bytes
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.aicopilot: DEBUG
+    org.springframework.security: INFO
