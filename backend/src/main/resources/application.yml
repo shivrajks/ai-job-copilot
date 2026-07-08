@@ -36,6 +36,21 @@ spring:
           max-active: 10
           max-idle: 5
 
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:true}
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   servlet:
     multipart:
       max-file-size: 5MB
@@ -55,18 +70,39 @@ jwt:
   access-token-expiration: 900000    # 15 minutes
   refresh-token-expiration: 604800000 # 7 days
 
+# AI Configuration
+ai:
+  provider: ${AI_PROVIDER:mock}
+
 # Gemini AI Configuration
 gemini:
   api-key: ${GEMINI_API_KEY:}
   flash-model: gemini-2.0-flash
   pro-model: gemini-1.5-pro
 
+# Auth Security
+auth:
+  lockout:
+    max-attempts: 5
+    duration-minutes: 15
+
 # Rate Limiting
 rate-limit:
+  auth:
+    max-requests: 10
+    window-minutes: 1
   free-tier:
     requests-per-month: 5
   pro-tier:
     requests-per-month: 10000
+
+# CORS
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+# Application
+app:
+  base-url: ${APP_BASE_URL:http://localhost:3000}
 
 # Resume Storage
 resume:

@@ -15,7 +15,7 @@
     --secondary: 0 0% 94%;
     --secondary-foreground: 0 0% 20%;
     --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 45%;
+    --muted-foreground: 0 0% 38%;
     --accent: 239 84% 95%;
     --accent-foreground: 239 84% 35%;
     --destructive: 0 84% 60%;
@@ -60,15 +60,46 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 4rem;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer utilities {
   .glass {
     @apply bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   .glass-nav {
     @apply bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-border;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .glass-elevated {
+    @apply bg-white/80 dark:bg-white/10 backdrop-blur-2xl border border-white/30 dark:border-white/15 shadow-xl;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
 }

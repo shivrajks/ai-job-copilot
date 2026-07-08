@@ -1,10 +1,15 @@
 package com.aicopilot.service;
 
+import com.aicopilot.ai.dto.AiDtos.ParseResponse;
+import com.aicopilot.ai.parser.RuleBasedResumeParser;
+import com.aicopilot.ai.parser.TikaResumeParser;
+import com.aicopilot.ai.service.AiService;
 import com.aicopilot.dto.ResumeDtos;
 import com.aicopilot.dto.ResumeDtos.*;
 import com.aicopilot.entity.Resume;
 import com.aicopilot.entity.User;
 import com.aicopilot.exception.AppException;
+import com.aicopilot.repository.ApplicationRepository;
 import com.aicopilot.repository.ResumeRepository;
 import com.aicopilot.repository.UserRepository;
 import com.aicopilot.service.file.FileStorageService;
@@ -18,7 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -26,14 +35,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ResumeService {
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
     private static final int MAX_PAGE_SIZE = 100;
+
     private static final String PDF_MIME_TYPE = "application/pdf";
-    private static final byte[] PDF_MAGIC_BYTES = {0x25, 0x50, 0x44, 0x46, 0x2D}; // %PDF-
+    private static final String DOCX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    private static final byte[] PDF_MAGIC_BYTES = {0x25, 0x50, 0x44, 0x46, 0x2D};
+    private static final byte[] DOCX_MAGIC_BYTES = {0x50, 0x4B, 0x03, 0x04};
+
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(PDF_MIME_TYPE, DOCX_MIME_TYPE);
+    private static final Map<String, byte[]> MAGIC_BYTES = Map.of(
+            PDF_MIME_TYPE, PDF_MAGIC_BYTES,
+            DOCX_MIME_TYPE, DOCX_MAGIC_BYTES
+    );
 
     private final ResumeRepository resumeRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final ApplicationRepository applicationRepository;
+    private final AiService aiService;
+    private final TikaResumeParser tikaResumeParser;
+    private final RuleBasedResumeParser ruleBasedResumeParser;
 
     @Transactional
     public UploadResponse uploadResume(MultipartFile file, UUID userId) {
@@ -164,6 +186,20 @@ public class ResumeService {
             throw new AppException("Access denied", HttpStatus.FORBIDDEN);
         }
 
+        // Check for application references before deleting
+        long applicationCount = applicationRepository
+                .findByUserIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .filter(a -> a.getResume() != null && a.getResume().getId().equals(resumeId))
+                .count();
+
+        if (applicationCount > 0) {
+            throw new AppException(
+                    "Cannot delete resume: it is linked to " + applicationCount +
+                            " application(s). Remove the application references first.",
+                    HttpStatus.CONFLICT);
+        }
+
         // Delete file from storage
         try {
             fileStorageService.delete(resume.getOriginalFileUrl());
@@ -225,27 +261,99 @@ public class ResumeService {
             throw new AppException("File size exceeds maximum limit of 5MB", HttpStatus.BAD_REQUEST);
         }
 
-        // Validate MIME type
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.equals(PDF_MIME_TYPE)) {
-            throw new AppException("Only PDF files are accepted", HttpStatus.BAD_REQUEST);
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType)) {
+            throw new AppException("Only PDF and DOCX files are accepted", HttpStatus.BAD_REQUEST);
         }
 
-        // Validate magic bytes (check if actual PDF content)
+        String originalName = file.getOriginalFilename();
+        if (originalName != null && !originalName.isBlank()) {
+            String lower = originalName.toLowerCase();
+            if (!lower.endsWith(".pdf") && !lower.endsWith(".docx")) {
+                throw new AppException("File must have .pdf or .docx extension", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        byte[] expectedMagic = MAGIC_BYTES.get(contentType);
+        if (expectedMagic == null) {
+            throw new AppException("Unsupported file type", HttpStatus.BAD_REQUEST);
+        }
+
         try {
-            byte[] header = new byte[5];
+            byte[] header = new byte[expectedMagic.length];
             int read = file.getInputStream().read(header);
-            if (read < 5) {
+            if (read < expectedMagic.length) {
                 throw new AppException("Invalid file: unable to read file header", HttpStatus.BAD_REQUEST);
             }
-            for (int i = 0; i < 5; i++) {
-                if (header[i] != PDF_MAGIC_BYTES[i]) {
-                    throw new AppException("Invalid file: not a valid PDF document", HttpStatus.BAD_REQUEST);
+            for (int i = 0; i < expectedMagic.length; i++) {
+                if (header[i] != expectedMagic[i]) {
+                    String typeName = contentType.equals(PDF_MIME_TYPE) ? "PDF" : "DOCX";
+                    throw new AppException("Invalid file: not a valid " + typeName + " document", HttpStatus.BAD_REQUEST);
                 }
             }
         } catch (IOException e) {
             throw new AppException("Failed to validate file: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Transactional
+    public ResumeDetail parseResume(UUID userId, UUID resumeId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new AppException("Resume not found", HttpStatus.NOT_FOUND));
+
+        if (!resume.getUser().getId().equals(user.getId())) {
+            throw new AppException("Access denied", HttpStatus.FORBIDDEN);
+        }
+
+        if (resume.getParsingStatus() == Resume.ParsingStatus.PROCESSING) {
+            throw new AppException("Resume is already being parsed", HttpStatus.CONFLICT);
+        }
+
+        resume.setParsingStatus(Resume.ParsingStatus.PROCESSING);
+        resume.setParseAttempts(resume.getParseAttempts() + 1);
+        resume.setErrorMessage(null);
+        resume = resumeRepository.save(resume);
+
+        try {
+            String rawText;
+            try (InputStream inputStream = fileStorageService.retrieve(resume.getOriginalFileUrl())) {
+                rawText = tikaResumeParser.extractText(inputStream);
+            }
+
+            ParseResponse aiResponse = aiService.parseResume(resumeId, rawText);
+
+            if (aiResponse.isSuccess()) {
+                resume.setParsedContent(aiResponse.getParsedContent());
+                resume.setStructuredData(aiResponse.getStructuredData());
+                resume.setParsingStatus(Resume.ParsingStatus.PARSED);
+                resume.setParsedAt(LocalDateTime.now());
+                resume.setErrorMessage(null);
+            } else {
+                log.info("AI parsing failed for resume {}, falling back to rule-based parser", resumeId);
+                RuleBasedResumeParser.ParseResult ruleResult = ruleBasedResumeParser.parse(rawText);
+                if (ruleResult.success()) {
+                    resume.setParsedContent(ruleResult.parsedContent());
+                    resume.setStructuredData(ruleResult.structuredData());
+                    resume.setParsingStatus(Resume.ParsingStatus.PARSED);
+                    resume.setParsedAt(LocalDateTime.now());
+                    resume.setErrorMessage(null);
+                } else {
+                    resume.setParsedContent(rawText);
+                    resume.setParsingStatus(Resume.ParsingStatus.FAILED);
+                    resume.setErrorMessage(aiResponse.getErrorMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to parse resume: {}", resumeId, e);
+            resume.setParsingStatus(Resume.ParsingStatus.FAILED);
+            resume.setErrorMessage("Parsing failed: " + e.getMessage());
+        }
+
+        resume = resumeRepository.save(resume);
+        return ResumeDtos.toDetail(resume);
     }
 
     private String generateResumeName(String originalFilename, int version) {

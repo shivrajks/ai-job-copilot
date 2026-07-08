@@ -1,12 +1,16 @@
 package com.aicopilot.service.file;
 
+import com.aicopilot.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,17 +35,16 @@ public class LocalFileStorageService implements FileStorageService {
             Files.createDirectories(this.storageBasePath);
             log.info("Resume storage initialized at: {}", this.storageBasePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize resume storage directory: " + storagePath, e);
+            throw new AppException("Failed to initialize resume storage directory: " + storagePath, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
     public String store(MultipartFile file, String userId) {
         try {
-            // Generate UUID-based filename (never use original filename)
-            String storedFilename = UUID.randomUUID().toString() + ".pdf";
+            String extension = resolveExtension(file.getOriginalFilename());
+            String storedFilename = UUID.randomUUID().toString() + extension;
 
-            // Create user-specific subdirectory
             Path userDir = storageBasePath.resolve(userId);
             Files.createDirectories(userDir);
 
@@ -52,28 +55,41 @@ public class LocalFileStorageService implements FileStorageService {
             return targetPath.toString();
         } catch (IOException e) {
             log.error("Failed to store resume file for user: {}", userId, e);
-            throw new RuntimeException("Failed to store file", e);
+            throw new AppException("Failed to store file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String resolveExtension(String originalFilename) {
+        if (originalFilename != null) {
+            int lastDot = originalFilename.lastIndexOf('.');
+            if (lastDot > 0 && lastDot < originalFilename.length() - 1) {
+                String ext = originalFilename.substring(lastDot).toLowerCase();
+                if (ext.equals(".pdf") || ext.equals(".docx")) {
+                    return ext;
+                }
+            }
+        }
+        return ".pdf";
     }
 
     @Override
     public InputStream retrieve(String fileUrl) {
         try {
-            Path filePath = Paths.get(fileUrl);
+            Path filePath = resolveSafePath(fileUrl);
             if (!Files.exists(filePath)) {
-                throw new RuntimeException("File not found: " + fileUrl);
+                throw new AppException("File not found", HttpStatus.NOT_FOUND);
             }
             return Files.newInputStream(filePath);
         } catch (IOException e) {
             log.error("Failed to retrieve file: {}", fileUrl, e);
-            throw new RuntimeException("Failed to retrieve file: " + fileUrl, e);
+            throw new AppException("Failed to retrieve file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
     public boolean delete(String fileUrl) {
         try {
-            Path filePath = Paths.get(fileUrl);
+            Path filePath = resolveSafePath(fileUrl);
             boolean deleted = Files.deleteIfExists(filePath);
             if (deleted) {
                 log.info("Deleted resume file: {}", fileUrl);
@@ -83,6 +99,19 @@ public class LocalFileStorageService implements FileStorageService {
             log.error("Failed to delete file: {}", fileUrl, e);
             return false;
         }
+    }
+
+    private Path resolveSafePath(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            throw new AppException("File path must not be empty", HttpStatus.BAD_REQUEST);
+        }
+        String decoded = URLDecoder.decode(fileUrl, StandardCharsets.UTF_8);
+        Path resolved = storageBasePath.resolve(decoded).normalize();
+        if (!resolved.startsWith(storageBasePath)) {
+            log.warn("Path traversal attempt blocked: {}", fileUrl);
+            throw new AppException("Access denied", HttpStatus.FORBIDDEN);
+        }
+        return resolved;
     }
 
 }

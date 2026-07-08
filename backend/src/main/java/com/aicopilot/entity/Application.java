@@ -71,6 +71,6 @@ public class Application {
 
     public enum Stage {
         SAVED, APPLIED, PHONE_SCREEN, TECHNICAL_INTERVIEW,
-        ONSITE, OFFER, REJECTED, WITHDRAWN
+        ONSITE, OFFER, ACCEPTED, REJECTED, WITHDRAWN
     }
 }

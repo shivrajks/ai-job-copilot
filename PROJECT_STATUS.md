@@ -1,419 +1,235 @@
-# AI Job Application Copilot — Project Status
+# AI Job Copilot — Project Status
 
-**Last Updated:** 2026-06-23
+**Last Updated:** 2026-07-08
 **Version:** 1.0.0-SNAPSHOT
-**Status:** Phase B — Authentication (Complete)
+**Status:** Sprint 26 Complete — Deployment Readiness & Portfolio Release Preparation
 
 ---
 
-## 1. Completed Features
+## 1. Completed Phases
 
-### Phase A — Project Foundation
+### Phase A — Project Foundation ✅
 - [x] Monorepo structure (backend, frontend, docker, docs)
-- [x] Spring Boot 3.3.1 + Java 21 + Maven 3.9.9 backend
-- [x] Next.js 15.1 + React 19 + TypeScript + Tailwind CSS frontend
-- [x] ShadCN UI component library (Button, Input, Label)
+- [x] Spring Boot 3.3.1 + Java 21 + Maven backend
+- [x] Next.js 15 + React 19 + TypeScript + Tailwind CSS frontend
+- [x] ShadCN UI component library
 - [x] Docker Compose (PostgreSQL 16 + Redis 7)
-- [x] Zustand auth store
+- [x] Zustand state management
 - [x] Framer Motion animations
-- [x] Glassmorphism design system (light + dark mode CSS variables)
-- [x] Landing page (hero, features, pricing, footer)
-- [x] Dashboard page (sidebar nav, stats cards, quick actions, activity feed)
-- [x] Login page (validation, error handling, Google OAuth placeholder)
-- [x] Register page (validation, password strength indicator)
-- [x] Forgot Password page (email input, success state)
-- [x] Reset Password page (token-based, validation, success state)
+- [x] Glassmorphism design system (light + dark mode)
+- [x] Engineering manual (10 documents)
 
-### Phase B — Authentication
-- [x] User entity (UUID, email, password, fullName, avatarUrl, role, planTier, emailVerified, timestamps)
-- [x] Role enum (USER, ADMIN)
-- [x] PlanTier enum (FREE, PRO)
-- [x] JWT token provider (HS256, access + refresh tokens)
-- [x] JWT authentication filter (Bearer token extraction, validation)
-- [x] Custom UserDetailsService
+### Phase B — Authentication ✅
+- [x] User entity (UUID, email, password, fullName, role, planTier, googleId, emailVerified, lastLoginAt)
+- [x] JWT token provider (HS256, access 15min + refresh 7d)
+- [x] JWT authentication filter + CustomUserDetailsService
 - [x] BCrypt password encoder (strength 12)
-- [x] Security config (stateless sessions, CORS, permitAll for auth endpoints)
-- [x] Register API (`POST /api/auth/register`)
-- [x] Login API (`POST /api/auth/login`)
-- [x] Token Refresh API (`POST /api/auth/refresh`) with rotation
-- [x] Logout API (`POST /api/auth/logout`) — revokes refresh token
-- [x] Logout All API (`POST /api/auth/logout-all`) — revokes all user tokens
-- [x] Forgot Password API (`POST /api/auth/forgot-password`) — no email enumeration
-- [x] Reset Password API (`POST /api/auth/reset-password`) — token validation, revokes all sessions
-- [x] RefreshToken entity + repository (token persistence, revocation, expiry)
-- [x] PasswordResetToken entity + repository (single-use, 1-hour expiry)
-- [x] Global exception handler (AppException, validation, JWT, bad credentials, generic)
-- [x] Custom error response format (status, error, message, details, timestamp, path)
-- [x] Input validation (server-side annotations + client-side validation)
-- [x] Unit tests for AuthService (42 test cases across 6 nested test classes)
-- [x] Database migration V1__initial_schema.sql (all tables + indexes)
+- [x] Security config (stateless, CORS, permitAll for auth)
+- [x] Register, Login, Refresh, Logout, Logout-All, Forgot Password, Reset Password APIs
+- [x] RefreshToken + PasswordResetToken entities with repositories
+- [x] Global exception handler (AppException, ErrorResponse, 7 handlers)
+- [x] Input validation (server annotations + client-side)
+- [x] 17 unit tests for AuthService
+- [x] V1 migration (users, resumes, jd, applications, interview_sessions, cover_letters, refresh_tokens, password_reset_tokens)
+
+### Phase C — Premium UI/UX ✅
+- [x] DashboardShell layout (sidebar + topbar + content area)
+- [x] Sidebar (collapsible, nav links, active states, mobile responsive)
+- [x] Topbar (user menu, theme toggle, search)
+- [x] PageHeader, PageContainer, SectionContainer components
+- [x] UI primitives: Button, Input, Label, Card, Badge, Tabs, Select, Switch, Progress
+- [x] Feedback components: Skeleton, LoadingScreen, InlineLoader, ErrorState, EmptyState
+- [x] Framer Motion variants for page transitions
+- [x] Dark/light mode with next-themes
+- [x] Responsive design (375px–1440px)
+
+### Phase D — Resume Management ✅
+- [x] Resume entity + repository (parsing_status, file metadata, versioning, active flag)
+- [x] ResumeService (upload, CRUD, rename, set active, pagination)
+- [x] ResumeController (POST/GET /resumes, GET/PUT/DELETE /resumes/{id})
+- [x] FileStorageService + LocalFileStorageService (UUID filenames, 5MB limit)
+- [x] TikaResumeParser + RuleBasedResumeParser
+- [x] ResumeDtos (UploadResponse, ResumeListItem, ResumeDetail, RenameRequest)
+- [x] V2 migration (parsing_status, error_message, is_active, file_size, mime_type)
+- [x] V3 migration (parsed_at, parse_attempts)
+- [x] Frontend: Resume list, uploader, detail panel, rename, delete, toolbar
+
+### Phase E — Job Description Analysis ✅
+- [x] JobDescription entity + repository (analysis lifecycle, structured_data)
+- [x] JobDescriptionService + JobDescriptionController
+- [x] JobDescriptionAiService + GeminiJobDescriptionAiService + MockJobDescriptionAiService
+- [x] JobDescriptionAnalysisPrompts
+- [x] JobDescriptionDtos
+- [x] V4 migration (analysis_status, analyzed_at, analysis_attempts, error_message, structured_data)
+- [x] Frontend: Jobs page with JD management
+
+### Phase F — ATS Scoring Engine ✅
+- [x] MatchService (skill match, experience fit, education fit, keyword alignment)
+- [x] ScoreExplanationService (category breakdown, scoring rationale)
+- [x] RecommendationService (improvement suggestions, learning resources)
+- [x] MatchController (+ TailorController for resume tailoring)
+- [x] Match module: SkillSynonymMap, EducationLevel
+- [x] ATS DTOs, Match DTOs, Tailor DTOs, Score explanation DTOs
+- [x] Frontend: Match result view, ATS reports, score explanations, tailor components
+
+### Phase G — Gemini AI Integration ✅
+- [x] AiService interface + GeminiAiService + MockAiService
+- [x] AiConfig (API key, model selection: Flash/Pro, timeouts, connection pooling)
+- [x] AsyncConfig (thread pool for AI operations)
+- [x] TailoringAiService + GeminiTailoringAiService + MockTailoringAiService
+- [x] CoverLetterAiService + GeminiCoverLetterAiService + MockCoverLetterAiService
+- [x] InterviewAiService + GeminiInterviewAiService + MockInterviewAiService
+- [x] JobDescriptionAiService + GeminiJobDescriptionAiService + MockJobDescriptionAiService
+- [x] Prompt templates: ResumeTailoring, ResumeParsing, JDAnalysis, Interview, CoverLetter
+- [x] AiDtos (ParseRequest, ParseResponse, OptimizeRequest, OptimizeResponse, etc.)
+- [x] Rate limiting config (free: 5/mo, pro: 10000/mo)
+
+### Phase H — Interview Coach ✅
+- [x] InterviewSession entity + repository
+- [x] InterviewService (generate questions, mock sessions, evaluate answers, history)
+- [x] InterviewValidator
+- [x] InterviewController (generate, start mock, respond, end, evaluate, sessions)
+- [x] InterviewDtos (QuestionSet, SessionDetail, AnswerEvaluation, SessionHistory)
+- [x] V6 migration (resume_id, title, difficulty, status, question_count, answered_count, updated_at)
+- [x] Frontend: Interview list, generate dialog, session view, feedback, progress, history
+- [x] Frontend: Dynamic route /interviews/[id]
+
+### Phase I — Application Tracker ✅
+- [x] Application entity + repository (stage pipeline, notes, salary, URLs)
+- [x] ApplicationService + ApplicationController
+- [x] Job entity + JobRepository + JobSpecification (filtering, sorting)
+- [x] JobService + JobController
+- [x] ApplicationDtos, JobDtos
+- [x] V8 migration (jobs table with full tracker fields)
+- [x] Frontend: Tracker page with list/kanban views
+- [x] Frontend: Application dialog, detail panel, delete, toolbar
+
+### Phase J — Analytics Dashboard ✅
+- [x] AnalyticsService (application stats, resume stats, ATS trends, interview performance)
+- [x] AnalyticsController
+- [x] AnalyticsDtos (AnalyticsResponse, ApplicationAnalytics, ResumeAnalytics, etc.)
+- [x] Frontend: Analytics page with stat cards, pipeline, top skills, interview performance, ATS overview, activity
+
+### Phase K — Infrastructure ✅
+- [x] EmailService + password reset email template
+- [x] FileStorageService + LocalFileStorageService
+- [x] Docker Compose (PostgreSQL 16 + Redis 7)
+- [x] application.yml configured for all external services
+- [x] V7 migration (user_settings table)
+- [x] GitHub Actions CI/CD config
+- [x] Actuator endpoints (health, info, metrics)
+
+### Sprint 14–18M — Backend Expansion ✅
+- [x] Expanded service-layer test coverage (286 tests)
+- [x] Additional controller/service implementations
+- [x] Production hardening (entity-migration consistency, ObjectMapper, transaction boundaries)
+- [x] QA review with 3 critical fixes identified and resolved
+
+### Sprint 19–20 — Security Fixes ✅
+- [x] Path traversal vulnerability fix
+- [x] Refresh token rotation security
+- [x] CORS configuration hardening
+- [x] Rate limiting implementation verified
+- [x] Account lockout mechanism
+- [x] Input validation annotations
+- [x] Empty catch block remediation
+- [x] Exception consistency improvements
+
+### Sprint 21–25G — Premium Frontend Redesign ✅
+- [x] Glassmorphism design system (light + dark mode)
+- [x] CSS variable color tokens with `dark:` variants
+- [x] Premium landing page: hero, outcome stats, how it works, 6 bento feature modules
+- [x] Product workflow preview section
+- [x] Anonymous testimonial system ("Candidate 01/02/03")
+- [x] Pricing section with light/dark styling
+- [x] FAQ with glass card design
+- [x] Footer with connected command-center theme
+- [x] ThemeToggle with landing variant in public navbar
+- [x] Anchor scroll offset (`scroll-mt-20` on all section IDs)
+- [x] Responsive design (mobile + desktop)
+
+### Sprint 25H — Final Visual Polish ✅
+- [x] Headline copy: "Apply smarter. Interview better. Get hired faster."
+- [x] Mockup position fix (reduced overflow clipping at 1366px)
+- [x] First-fold spacing (removed duplicate stat cards from hero)
+- [x] Feature section dark-mode consistency audit
+- [x] Built-in screenshot verification
+
+### Sprint 26 — Deployment & Portfolio Release ✅
+- [x] Environment variable audit (frontend + backend)
+- [x] .env.example fixes (wrong default port, missing vars)
+- [x] Deployment env guide updated
+- [x] Root README upgrade to portfolio quality
+- [x] Deployment checklist verified
+- [x] Portfolio release checklist verified
+- [x] Backend tests: `mvn clean test` (286 passing)
+- [x] Frontend: `npm run type-check` (0 errors)
+- [x] Frontend: `npm run build` (0 errors)
 
 ---
 
-## 2. Pending Features
-
-### Phase C — Premium UI System
-**Design Inspiration:** Linear, Stripe, Vercel, Notion
-**Requirements:** Premium SaaS appearance, Dark/Light mode, Smooth animations, Glassmorphism, Framer Motion
-**Avoid:** Generic admin dashboard, Bootstrap look, Default blue themes
-
-- [ ] Design Tokens (color palette, typography scale, spacing, shadows, border radius)
-- [ ] Theme System (dark mode, light mode, theme toggle, localStorage persistence)
-- [ ] Navbar Component (glassmorphism, sticky, user menu, notifications, search)
-- [ ] Sidebar Component (collapsible, nested nav, active states, mobile responsive)
-- [ ] Layout Component (sidebar + navbar + content area, responsive breakpoints)
-- [ ] Dashboard Page (premium redesign with animated stats, charts, activity feed)
-- [ ] Landing Page (premium redesign with animations, gradient mesh, micro-interactions)
-- [ ] Auth Pages (premium redesign — login, register, forgot/reset password)
-- [ ] Loading States (skeleton loaders, shimmer effects, spinner components)
-- [ ] Toast Notifications (success, error, warning, info with animations)
-- [ ] Modal/Dialog System (frosted overlay, scale animation, focus trap)
-- [ ] Card Components (glass cards, stat cards, interactive hover cards)
-- [ ] Form Components (textarea, select, checkbox, toggle, file upload dropzone)
-- [ ] Data Table Component (sorting, filtering, pagination, row actions)
-- [ ] Tooltip & Popover Components
-- [ ] Avatar Component (image, fallback initials, status indicator)
-- [ ] Badge/Tag Components (status badges, skill tags, pipeline stage badges)
-- [ ] Progress Bar & Score Ring Components (animated, color-coded)
-- [ ] Tab Component (animated indicator, keyboard navigation)
-- [ ] Command Palette (Cmd+K search, keyboard shortcuts, Linear-style)
-
-### Phase D — Resume Management
-**Requirements:** PDF only, Validation, Secure uploads, Error handling
-
-- [ ] Resume Upload API (`POST /api/resumes/upload`)
-  - PDF file validation (magic bytes, not just extension)
-  - 5MB file size limit
-  - Virus scan integration point
-  - S3-compatible storage (local dev: filesystem)
-  - UUID-based file naming (never store original filename)
-- [ ] Resume PDF Parsing Service
-  - Apache Tika integration for text extraction
-  - Structured data extraction (name, email, phone, summary, experience, education, skills)
-  - Confidence scoring per extracted field
-  - Fallback error handling for corrupted PDFs
-- [ ] Resume Storage Service
-  - Store parsed content as JSONB in database
-  - Link to file storage URL
-  - Version management (user can have multiple versions)
-- [ ] Resume Metadata Management
-  - Resume name, upload date, file size, parsing status
-  - Active/inactive resume flag
-  - Resume CRUD APIs (GET, PUT, DELETE)
-- [ ] Resume DTOs (ResumeUploadResponse, ResumeMetadata, ResumeDetail)
-- [ ] Resume Service (business logic layer)
-- [ ] Resume Controller (REST endpoints)
-- [ ] Frontend: Upload Resume Screen
-  - Drag-and-drop upload zone
-  - File type/size validation
-  - Upload progress indicator
-  - Success/error feedback
-  - Preview of uploaded resume
-- [ ] Frontend: Resume Management Dashboard
-  - List of user's resumes with metadata
-  - Resume cards with name, date, status
-  - Actions: view, rename, delete, set active
-  - Empty state with upload CTA
-  - Resume detail view with parsed content preview
-
-### Phase E — Job Description Analysis
-**Features:** Paste JD, Upload JD, Extract Skills, Extract Keywords
-
-- [ ] JD Input Service
-  - Accept raw text paste (up to 10,000 characters)
-  - URL fetching with HTML stripping (LinkedIn, Indeed, Glassdoor, company pages)
-  - PDF/DOCX upload for JD documents
-  - Auto-detection and cleaning of HTML tags
-- [ ] JD Parsing & Analysis Service
-  - Extract required skills vs preferred skills
-  - Extract keywords with frequency and importance ranking
-  - Detect seniority level from JD text
-  - Detect company culture signals
-  - Salary range extraction (if mentioned)
-  - Red flag detection patterns
-- [ ] Skill Extraction Engine
-  - Map to standardized skill taxonomy (ESCO/O*NET based)
-  - Normalize skill names ("React.js" → "React")
-  - Categorize: Technical, Soft Skills, Tools, Frameworks, Certifications
-- [ ] Keyword Analysis Engine
-  - TF-IDF scoring
-  - Contextual importance via Gemini
-  - Keyword density recommendations
-  - Group by category
-- [ ] JD Entity + Repository (company, title, rawText, extractedSkills, url)
-- [ ] JD DTOs (JDCreateRequest, JDAnalysisResponse, SkillMatchResult)
-- [ ] JD Controller (POST /api/jobs, GET /api/jobs, GET /api/jobs/{id})
-- [ ] Frontend: Analysis Screen
-  - Text paste area with character count
-  - URL input with fetch button
-  - File upload option
-  - Analyze button with loading state
-- [ ] Frontend: Results Screen
-  - Extracted skills categorized display
-  - Keyword cloud with importance indicators
-  - Seniority level badge
-  - Red flags warning section
-  - Save to tracker CTA
-
-### Phase F — ATS Scoring Engine
-**Features:** Resume Score, JD Match Percentage, Missing Skills, Improvement Suggestions
-
-- [ ] ATS Scoring Service
-  - Section heading detection (Experience, Education, Skills, Summary)
-  - Keyword density analysis
-  - Formatting complexity check (tables, columns, images)
-  - Contact info presence validation
-  - Date format consistency check
-  - File structure analysis
-  - Score calculation (0-100) with category breakdown
-- [ ] JD Match Service
-  - Skills match (exact + semantic via pgvector)
-  - Experience level fit analysis
-  - Education fit analysis
-  - Keyword alignment scoring
-  - Weighted overall match percentage
-- [ ] Gap Analysis Service
-  - Compare resume skills vs JD requirements
-  - Categorize gaps: Critical, Important, Nice-to-have
-  - Suggest learning resources for top missing skills
-  - Market demand data for missing skills
-- [ ] Improvement Suggestions Engine
-  - Specific actionable suggestions
-  - "Missing skills section" type warnings
-  - Keyword injection recommendations
-  - Bullet point improvement tips
-- [ ] Analytics APIs
-  - GET /api/ats/score/{resumeId}
-  - GET /api/ats/match/{resumeId}/{jdId}
-  - GET /api/ats/gaps/{resumeId}/{jdId}
-  - GET /api/ats/suggestions/{resumeId}
-- [ ] ATS DTOs (ScoreResponse, MatchResponse, GapResponse, SuggestionResponse)
-- [ ] Frontend: ATS Score Display
-  - Animated score ring (circular progress)
-  - Category breakdown bars
-  - Color-coded: green/amber/orange/red
-  - Detailed issue list with fix suggestions
-- [ ] Frontend: Match Results Display
-  - Overall match percentage ring
-  - Skills comparison (matched/partial/missing)
-  - Keyword presence/absence list
-  - Gap analysis visualization
-
-### Phase G — Gemini AI Integration
-**Features:** Resume Optimization, Cover Letter Generator, Skill Gap Analysis, Career Suggestions
-**Requirements:** Service Abstraction Layer, Prompt Templates, Retry Logic, Rate Limiting, Logging, Error Handling
-
-- [ ] Gemini API Configuration
-  - API key from environment variable
-  - Model selection: Flash (fast/cheap) vs Pro (deep reasoning)
-  - Base URL and timeout configuration
-  - Connection pooling
-- [ ] AI Service Abstraction Layer
-  - Generic `AiService` interface
-  - `GeminiAiService` implementation
-  - Request/Response logging
-  - Token usage tracking
-  - Cost estimation per request
-- [ ] Prompt Template System
-  - Resume optimization prompt
-  - Cover letter generation prompt
-  - Skill gap analysis prompt
-  - Career suggestion prompt
-  - Interview question generation prompt
-  - Answer evaluation prompt
-  - Template versioning
-- [ ] Retry Logic
-  - Exponential backoff (3 attempts)
-  - Transient error detection (rate limits, timeouts)
-  - Circuit breaker pattern for persistent failures
-  - Fallback responses
-- [ ] Rate Limiting
-  - Redis-based sliding window per user
-  - Free tier: 5 requests/month
-  - Pro tier: unlimited
-  - Usage tracking and quota enforcement
-  - Rate limit headers in responses
-- [ ] Resume Optimization Service (Gemini Flash)
-  - Input: resume content + JD text
-  - Output: optimized resume JSON with changes explained
-  - Keyword injection suggestions
-  - Bullet point rewrites (STAR method)
-  - Skills reordering by relevance
-  - Summary rewrite
-- [ ] Cover Letter Generator Service (Gemini Flash)
-  - Input: resume + JD + company info + tone preference
-  - Output: 250-400 word cover letter
-  - Tone options: Professional, Enthusiastic, Concise, Creative
-  - Structure: Hook → Why company → Why you → Call to action
-  - Regenerate capability
-- [ ] Skill Gap Analysis Service (Gemini Pro)
-  - Input: resume skills + JD requirements
-  - Output: prioritized gap list with learning paths
-  - Resource suggestions (courses, docs, tutorials)
-  - Time estimates for skill acquisition
-- [ ] Career Suggestion Service (Gemini Pro)
-  - Input: resume + career goals
-  - Output: role recommendations, industry suggestions
-  - Salary range estimates
-  - Career path mapping
-- [ ] AI Usage Tracking Entity + Repository
-  - Track every AI request per user
-  - Feature type, tokens used, cost, timestamp
-  - Monthly aggregation for quota enforcement
-- [ ] AI Controller Endpoints
-  - POST /api/ai/optimize-resume
-  - POST /api/ai/generate-cover-letter
-  - POST /api/ai/skill-gap-analysis
-  - POST /api/ai/career-suggestions
-  - GET /api/ai/usage (current period usage)
-- [ ] AI DTOs (OptimizeRequest, CoverLetterRequest, GapAnalysisResponse, etc.)
-- [ ] Frontend: AI Chat Interface
-  - Streaming response display
-  - Markdown rendering
-  - Copy to clipboard
-  - Regenerate button
-  - Usage quota display
-
-### Phase H — AI Interview Coach
-**Features:** Generate Questions, Behavioral Questions, Technical Questions, Answer Evaluation, AI Feedback
-
-- [ ] Interview Question Generation Service
-  - Input: JD + resume
-  - Generate 15-20 questions per session
-  - Categories: Technical (40%), Behavioral (30%), System Design (15%), Culture Fit (15%)
-  - Difficulty calibration based on seniority
-  - Questions ranked by likelihood
-  - Include: context why asked, what interviewer looks for, sample answer framework
-- [ ] Behavioral Question Engine
-  - Target JD-mentioned competencies
-  - STAR framework template per question
-  - Suggest which resume experiences to reference
-  - Common follow-up questions
-  - Difficulty rating (Easy/Medium/Hard)
-- [ ] Technical Question Engine
-  - Generate questions for each technology in JD
-  - Types: conceptual, coding scenarios, troubleshooting, architecture decisions
-  - Difficulty matched to role seniority
-  - Model answers and evaluation rubrics
-  - Links to relevant documentation
-- [ ] Mock Interview Simulator (Gemini Pro)
-  - Conversational AI interviewer
-  - Context-aware follow-up questions
-  - Real-time text-based interaction
-  - Session management (start, continue, end)
-  - Transcript recording
-- [ ] Answer Evaluation Service (Gemini Pro)
-  - Evaluate on: relevance (0-10), STAR compliance (0-10), confidence (0-10), completeness (0-10)
-  - Specific improvement suggestions per dimension
-  - Highlight strong points to reinforce
-  - Suggest additional points to include
-  - Track improvement over multiple sessions
-- [ ] Interview Session Entity + Repository
-  - Session type, questions, responses, scores, feedback
-  - User linking, timestamps
-  - Session history with scores and transcripts
-- [ ] Interview Controller Endpoints
-  - POST /api/interview/generate-questions
-  - POST /api/interview/mock/start
-  - POST /api/interview/mock/respond
-  - POST /api/interview/mock/end
-  - POST /api/interview/evaluate-answer
-  - GET /api/interview/sessions
-  - GET /api/interview/sessions/{id}
-- [ ] Interview DTOs (QuestionSet, MockSession, AnswerEvaluation, SessionHistory)
-- [ ] Frontend: Question Generation Screen
-  - Category tabs (All, Technical, Behavioral, System Design, Culture Fit)
-  - Question cards with likelihood bar, difficulty badge
-  - STAR framework expandable section
-  - "Practice this question" button
-  - Save to question bank
-- [ ] Frontend: Mock Interview Screen
-  - AI interviewer message bubble
-  - User text input area
-  - Word count and progress bar
-  - Skip / Get Feedback / End Session buttons
-  - Real-time typing indicator
-- [ ] Frontend: Feedback Screen
-  - Overall score with animated ring
-  - Per-dimension score bars
-  - Improvement suggestions list
-  - Try Again / Next Question / View Session buttons
-- [ ] Frontend: Interview History Screen
-  - List of past sessions with scores
-  - Filter by date, type, score
-  - Session detail view with full transcript
-  - Progress trend chart
-
-### Phase I — Application Tracker
-- [ ] Application CRUD APIs
-- [ ] Kanban pipeline (drag-and-drop)
-- [ ] Stage management with timestamps
-- [ ] Interview scheduling
-- [ ] Follow-up reminders
-- [ ] Tracker APIs and frontend page
-
-### Phase J — Analytics Dashboard
-- [ ] Response rate metrics
-- [ ] Pipeline funnel visualization
-- [ ] Applications per week trends
-- [ ] Best performing resume analysis
-- [ ] AI usage tracking
-- [ ] Analytics APIs and frontend page
-
-### Phase K — Infrastructure & DevOps
-- [ ] Google OAuth 2.0 integration
-- [ ] Email service (password reset, verification)
-- [ ] AWS S3 file storage
-- [ ] pgvector setup for semantic search
-- [ ] GitHub Actions CI/CD pipeline
-- [ ] AWS ECS Fargate deployment
-- [ ] Rate limiting (Redis-based)
-- [ ] Integration tests (Testcontainers)
-- [ ] E2E tests (Playwright)
-- [ ] Postman collection
-
----
-
-## 3. Current Architecture
+## 2. Current Architecture
 
 ### Backend Architecture (Spring Boot 3 Layers)
 
 ```
 com.aicopilot/
-├── AiCopilotApplication.java          # Main entry point
+├── AiCopilotApplication.java
 ├── config/
-│   └── SecurityConfig.java            # Spring Security, JWT, CORS, BCrypt
+│   ├── SecurityConfig.java
+│   └── StartupValidator.java
 ├── controller/
-│   └── AuthController.java            # 7 auth endpoints
+│   ├── AuthController.java
+│   ├── ResumeController.java
+│   ├── JobDescriptionController.java
+│   ├── JobController.java
+│   ├── ApplicationController.java
+│   ├── MatchController.java
+│   ├── TailorController.java
+│   ├── CoverLetterController.java
+│   ├── InterviewController.java
+│   ├── AnalyticsController.java
+│   └── UserController.java
 ├── dto/
-│   └── AuthDtos.java                  # Request/Response DTOs (Register, Login,
-│                                      #   ForgotPassword, ResetPassword,
-│                                      #   RefreshToken, Logout, AuthResponse)
+│   ├── AuthDtos.java, ResumeDtos.java, JobDescriptionDtos.java
+│   ├── JobDtos.java, ApplicationDtos.java, MatchDtos.java
+│   ├── TailorDtos.java, AtsDtos.java
+│   ├── CoverLetterDtos.java, InterviewDtos.java
+│   ├── AnalyticsDtos.java, UserDtos.java
 ├── entity/
-│   ├── User.java                      # id, email, password, fullName, role, planTier
-│   ├── Resume.java                    # id, user, name, content, atsScore, version
-│   ├── JobDescription.java            # id, user, title, company, rawText, skills
-│   ├── Application.java               # id, user, resume, jd, company, role, stage
-│   ├── RefreshToken.java              # id, user, token, expiryDate, revoked
-│   └── PasswordResetToken.java        # id, user, token, expiryDate, used
+│   ├── User.java, Resume.java, JobDescription.java
+│   ├── Application.java, Job.java
+│   ├── CoverLetter.java, InterviewSession.java
+│   ├── RefreshToken.java, PasswordResetToken.java
+│   └── UserSettings.java
 ├── exception/
-│   ├── AppException.java              # Custom exception with HttpStatus
-│   ├── ErrorResponse.java             # Standard error response format
-│   └── GlobalExceptionHandler.java    # @RestControllerAdvice (7 exception handlers)
+│   ├── AppException.java, ErrorResponse.java
+│   └── GlobalExceptionHandler.java
 ├── repository/
-│   ├── UserRepository.java            # findByEmail, existsByEmail
-│   ├── ResumeRepository.java          # findByUserIdOrderByCreatedAtDesc
-│   ├── JobDescriptionRepository.java  # findByUserIdOrderByCreatedAtDesc
-│   ├── ApplicationRepository.java    # findByUserId, countByUserIdAndStageIn
-│   ├── RefreshTokenRepository.java    # findByToken, deleteByUser, revokeAllByUser
-│   └── PasswordResetTokenRepository.java # findByToken, deleteByUser
+│   ├── (10 repositories)
+│   └── JobSpecification.java
 ├── security/
-│   ├── JwtTokenProvider.java          # HS256, access (15min) + refresh (7d)
-│   ├── JwtAuthenticationFilter.java   # OncePerRequestFilter, Bearer extraction
-│   └── CustomUserDetailsService.java  # Loads user by UUID from repository
-└── service/
-    └── AuthService.java               # register, login, refresh, logout,
-                                       #   logoutAll, forgotPassword, resetPassword
+│   ├── JwtTokenProvider.java
+│   ├── JwtAuthenticationFilter.java
+│   └── CustomUserDetailsService.java
+├── service/
+│   ├── AuthService.java, UserService.java
+│   ├── ResumeService.java, JobDescriptionService.java
+│   ├── JobService.java, ApplicationService.java
+│   ├── MatchService.java, ScoreExplanationService.java
+│   ├── RecommendationService.java, TailoringService.java
+│   ├── CoverLetterService.java, InterviewService.java
+│   ├── AnalyticsService.java, EmailService.java
+│   └── file/ (FileStorageService, LocalFileStorageService)
+├── match/
+│   ├── SkillSynonymMap.java
+│   └── EducationLevel.java
+└── ai/
+    ├── config/ (AiConfig, AsyncConfig)
+    ├── dto/ (AiDtos)
+    ├── parser/ (TikaResumeParser, RuleBasedResumeParser)
+    ├── prompt/ (5 prompt template classes)
+    └── service/ (AiService, Gemini*, Mock* implementations)
 ```
 
 ### Frontend Architecture (Next.js 15 App Router)
@@ -421,224 +237,182 @@ com.aicopilot/
 ```
 src/
 ├── app/
-│   ├── layout.tsx                     # Root layout (Inter font, globals)
-│   ├── globals.css                    # Tailwind + CSS variables (light/dark)
-│   ├── page.tsx                       # Landing page (hero, features, pricing)
-│   ├── auth/
-│   │   ├── login/page.tsx             # Login form with validation
-│   │   ├── register/page.tsx          # Register form + password strength
-│   │   ├── forgot-password/page.tsx   # Email input + success state
-│   │   └── reset-password/page.tsx    # New password + token validation
-│   └── dashboard/
-│       └── page.tsx                   # Sidebar + stats + quick actions
-├── components/ui/
-│   ├── button.tsx                     # ShadCN Button (4 variants, 4 sizes)
-│   ├── input.tsx                      # ShadCN Input
-│   └── label.tsx                      # ShadCN Label
+│   ├── layout.tsx, page.tsx, globals.css
+│   ├── auth/ (login, register, forgot-password, reset-password)
+│   ├── dashboard/
+│   ├── resumes/
+│   ├── jobs/
+│   ├── jobs-tracker/
+│   ├── cover-letters/
+│   ├── interviews/ + interviews/[id]
+│   ├── tracker/
+│   ├── analytics/
+│   └── settings/
+├── components/
+│   ├── ui/ (Button, Input, Label, Card, Badge, Tabs, Select, Switch, Progress)
+│   ├── layout/ (DashboardShell, Sidebar, Topbar, UserMenu, PageHeader, etc.)
+│   ├── features/ (30+ domain components)
+│   ├── feedback/ (Skeleton, EmptyState, ErrorState, LoadingScreen, InlineLoader)
+│   ├── landing/ (HeroSection, FeaturesSection, PricingSection, etc.)
+│   └── navigation/ (SiteHeader, Footer)
 ├── lib/
-│   └── utils.ts                       # cn() utility (clsx + tailwind-merge)
-└── store/
-    └── auth.ts                        # Zustand auth store (token, user, setAuth, clearAuth)
-```
-
-### Authentication Flow
-
-```
-Register -> POST /api/auth/register -> BCrypt hash -> JWT pair -> 201
-Login    -> POST /api/auth/login    -> BCrypt verify -> JWT pair -> 200
-Refresh  -> POST /api/auth/refresh  -> Validate old -> Revoke old -> New pair -> 200
-Logout   -> POST /api/auth/logout   -> Revoke refresh token -> 200
-LogoutAll-> POST /api/auth/logout-all -> Revoke ALL user tokens -> 200
-Forgot   -> POST /api/auth/forgot-password -> UUID token (1h) -> Generic message -> 200
-Reset    -> POST /api/auth/reset-password -> Validate token -> BCrypt new -> Revoke all -> 200
+│   ├── api/ (12 API client modules)
+│   ├── config/ (env.ts)
+│   ├── constants/ (navigation, design, seo, status enums)
+│   ├── animations/ (variants.ts)
+│   ├── utils.ts
+│   └── dates.ts
+├── store/ (12 Zustand stores)
+├── types/ (10 type definition files)
+├── providers/ (AppProviders, ThemeProvider)
+└── middleware.ts
 ```
 
 ---
 
-## 4. Current Database Schema
-
-### Tables (PostgreSQL 16)
-
-**users**
-| Column | Type | Constraints |
-|---|---|---|
-| id | UUID | PK, gen_random_uuid() |
-| email | VARCHAR(255) | UNIQUE, NOT NULL |
-| password | VARCHAR(255) | NOT NULL (BCrypt hash) |
-| full_name | VARCHAR(255) | NOT NULL |
-| avatar_url | VARCHAR(500) | |
-| role | VARCHAR(20) | NOT NULL, DEFAULT 'USER' |
-| email_verified | BOOLEAN | NOT NULL, DEFAULT FALSE |
-| created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() |
-| updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() |
-
-**resumes**
-| Column | Type | Constraints |
-|---|---|---|
-| id | UUID | PK |
-| user_id | UUID | FK -> users.id, CASCADE |
-| name | VARCHAR(255) | NOT NULL |
-| content | TEXT | |
-| structured_data | JSONB | |
-| ats_score | INTEGER | |
-| file_url | VARCHAR(500) | |
-| version | INTEGER | DEFAULT 1 |
-| is_active | BOOLEAN | DEFAULT TRUE |
-| created_at | TIMESTAMP | |
-| updated_at | TIMESTAMP | |
-
-**job_descriptions**
-| Column | Type | Constraints |
-|---|---|---|
-| id | UUID | PK |
-| user_id | UUID | FK -> users.id, CASCADE |
-| company | VARCHAR(255) | |
-| title | VARCHAR(255) | NOT NULL |
-| raw_text | TEXT | |
-| requirements | TEXT | |
-| extracted_skills | JSONB | |
-| url | VARCHAR(500) | |
-| created_at | TIMESTAMP | |
-| updated_at | TIMESTAMP | |
-
-**applications**
-| Column | Type | Constraints |
-|---|---|---|
-| id | UUID | PK |
-| user_id | UUID | FK -> users.id, CASCADE |
-| resume_id | UUID | FK -> resumes.id |
-| job_description_id | UUID | FK -> job_descriptions.id |
-| company | VARCHAR(255) | NOT NULL |
-| role_title | VARCHAR(255) | NOT NULL |
-| location | VARCHAR(255) | |
-| job_url | VARCHAR(500) | |
-| status | VARCHAR(30) | DEFAULT 'SAVED' |
-| applied_date | DATE | |
-| notes | TEXT | |
-| salary_min | INTEGER | |
-| salary_max | INTEGER | |
-| created_at | TIMESTAMP | |
-| updated_at | TIMESTAMP | |
-
-**refresh_tokens**
-| Column | Type | Constraints |
-|---|---|---|
-| id | UUID | PK |
-| user_id | UUID | FK -> users.id, CASCADE |
-| token | VARCHAR(500) | UNIQUE, NOT NULL |
-| expiry_date | TIMESTAMP | NOT NULL |
-| revoked | BOOLEAN | DEFAULT FALSE |
-| created_at | TIMESTAMP | |
-
-**password_reset_tokens**
-| Column | Type | Constraints |
-|---|---|---|
-| id | UUID | PK |
-| user_id | UUID | FK -> users.id, CASCADE |
-| token | VARCHAR(255) | UNIQUE, NOT NULL |
-| expiry_date | TIMESTAMP | NOT NULL |
-| used | BOOLEAN | DEFAULT FALSE |
-| created_at | TIMESTAMP | |
-
-**interview_sessions** — created, not yet used
-**cover_letters** — created, not yet used
-
-### Indexes
-- `idx_users_email` on users(email)
-- `idx_resumes_user_id` on resumes(user_id)
-- `idx_resumes_user_active` on resumes(user_id, is_active)
-- `idx_jd_user_id` on job_descriptions(user_id)
-- `idx_applications_user_id` on applications(user_id)
-- `idx_applications_status` on applications(status)
-- `idx_applications_user_status` on applications(user_id, status)
-- `idx_refresh_tokens_user` on refresh_tokens(user_id)
-- `idx_refresh_tokens_token` on refresh_tokens(token)
-- `idx_interview_sessions_user` on interview_sessions(user_id)
-- `idx_cover_letters_user` on cover_letters(user_id)
-
----
-
-## 5. Current Implementation Status
-
-### Build Status
+## 3. Build Status
 
 | Component | Command | Status |
-|---|---|---|
-| Backend compile | `mvn compile` | PASS (21 source files) |
-| Backend package | `mvn package -DskipTests` | PASS (fat JAR) |
-| Frontend type-check | `tsc --noEmit` | PASS (0 errors) |
-| Frontend build | `npm run build` | PASS (7 routes) |
-
-### API Endpoints (7 total)
-
-| Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| POST | /api/auth/register | Public | Create account, return JWT pair |
-| POST | /api/auth/login | Public | Verify credentials, return JWT pair |
-| POST | /api/auth/refresh | Public | Rotate refresh token, return new JWT pair |
-| POST | /api/auth/logout | Public | Revoke specific refresh token |
-| POST | /api/auth/logout-all | Authenticated | Revoke all user refresh tokens |
-| POST | /api/auth/forgot-password | Public | Create reset token (no enumeration) |
-| POST | /api/auth/reset-password | Public | Validate token, set new password |
-
-### Frontend Routes (7 total)
-
-| Route | Page | Features |
-|---|---|---|
-| / | Landing page | Hero, features grid, pricing cards, footer |
-| /auth/login | Login | Email/password validation, error display, Google OAuth placeholder |
-| /auth/register | Register | Full validation, password strength indicator, confirm password |
-| /auth/forgot-password | Forgot Password | Email input, success state, no enumeration |
-| /auth/reset-password | Reset Password | Token from URL, new password + confirm, strength indicator |
-| /dashboard | Dashboard | Sidebar nav, stat cards, quick actions, activity feed |
-
-### Test Coverage
-
-| Test Class | Tests | Coverage |
-|---|---|---|
-| AuthServiceTest.Register | 2 | New user, duplicate email |
-| AuthServiceTest.Login | 4 | Valid, invalid email, wrong password, lastLogin update |
-| AuthServiceTest.RefreshToken | 3 | Success, invalid, expired |
-| AuthServiceTest.Logout | 2 | Known token, unknown token |
-| AuthServiceTest.ForgotPassword | 2 | Existing email, non-existing email |
-| AuthServiceTest.ResetPassword | 4 | Success, invalid token, used token, expired token |
-| **Total** | **17 test methods** | **AuthService fully covered** |
-
-### Security Measures Implemented
-
-- BCrypt password hashing (strength 12)
-- JWT with short-lived access tokens (15 min) + refresh tokens (7 days)
-- Refresh token rotation (old revoked on each use)
-- Refresh token reuse detection (triggers session revocation)
-- No email enumeration on forgot password
-- Single-use password reset tokens with 1-hour expiry
-- Input validation on both client and server
-- Global exception handler (no stack traces leaked)
-- CORS whitelist (localhost:3000)
-- Stateless session management (no server-side sessions)
-- Email normalization (lowercase + trim)
-
-### Environment
-
-| Tool | Version | Path |
-|---|---|---|
-| Java | 21.0.11 (Temurin) | C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot |
-| Maven | 3.9.9 | C:\Users\Shadow\Tools\apache-maven-3.9.9 |
-| Node.js | 22.23.0 | Hermes bundled |
-| npm | 10.9.8 | Hermes bundled |
-| PostgreSQL | 16 (Docker) | docker-compose.yml |
-| Redis | 7 (Docker) | docker-compose.yml |
+| Backend compile | `mvn compile` | ✅ PASS (99+ source files) |
+| Backend tests | `mvn test` | ✅ PASS (286/286) |
+| Frontend type-check | `tsc --noEmit` | ✅ PASS (0 errors) |
+| Frontend build | `npm run build` | ✅ PASS (16 routes) |
 
 ---
 
-## 6. Next Steps
+## 4. API Endpoints
 
-1. **Phase C**: Premium UI System (design tokens, theme system, navbar, sidebar, layout, 20+ components)
-2. **Phase D**: Resume Management (upload, PDF parsing, storage, CRUD, frontend screens)
-3. **Phase E**: Job Description Analysis (paste/upload JD, skill extraction, keyword analysis)
-4. **Phase F**: ATS Scoring Engine (resume score, JD match, gap analysis, suggestions)
-5. **Phase G**: Gemini AI Integration (resume optimizer, cover letter generator, skill gap, career suggestions)
-6. **Phase H**: AI Interview Coach (question generation, mock interviews, answer evaluation, feedback)
-7. **Phase I**: Application Tracker (Kanban pipeline, stage management, scheduling)
-8. **Phase J**: Analytics Dashboard (response rates, funnel, trends, AI usage)
-9. **Phase K**: Infrastructure & DevOps (Google OAuth, email, AWS, CI/CD, tests)
+| Method | Endpoint | Auth | Module |
+|---|---|---|---|
+| POST | /api/auth/register | Public | Auth |
+| POST | /api/auth/login | Public | Auth |
+| POST | /api/auth/refresh | Public | Auth |
+| POST | /api/auth/logout | Public | Auth |
+| POST | /api/auth/logout-all | JWT | Auth |
+| POST | /api/auth/forgot-password | Public | Auth |
+| POST | /api/auth/reset-password | Public | Auth |
+| GET | /api/resumes | JWT | Resume |
+| POST | /api/resumes | JWT | Resume |
+| GET | /api/resumes/{id} | JWT | Resume |
+| PUT | /api/resumes/{id} | JWT | Resume |
+| DELETE | /api/resumes/{id} | JWT | Resume |
+| POST | /api/resumes/{id}/active | JWT | Resume |
+| GET | /api/job-descriptions | JWT | JD |
+| POST | /api/job-descriptions | JWT | JD |
+| GET | /api/job-descriptions/{id} | JWT | JD |
+| PUT | /api/job-descriptions/{id} | JWT | JD |
+| DELETE | /api/job-descriptions/{id} | JWT | JD |
+| POST | /api/job-descriptions/{id}/analyze | JWT | JD |
+| GET | /api/applications | JWT | Tracker |
+| POST | /api/applications | JWT | Tracker |
+| GET | /api/applications/{id} | JWT | Tracker |
+| PUT | /api/applications/{id} | JWT | Tracker |
+| DELETE | /api/applications/{id} | JWT | Tracker |
+| GET | /api/jobs | JWT | Tracker |
+| POST | /api/jobs | JWT | Tracker |
+| GET | /api/jobs/{id} | JWT | Tracker |
+| PUT | /api/jobs/{id} | JWT | Tracker |
+| DELETE | /api/jobs/{id} | JWT | Tracker |
+| POST | /api/match | JWT | ATS |
+| GET | /api/match/{resumeId}/{jdId} | JWT | ATS |
+| POST | /api/tailor/analyze | JWT | ATS |
+| POST | /api/tailor/suggest | JWT | ATS |
+| GET | /api/score/{resumeId}/explain | JWT | ATS |
+| POST | /api/cover-letters | JWT | Cover Letter |
+| GET | /api/cover-letters | JWT | Cover Letter |
+| GET | /api/cover-letters/{id} | JWT | Cover Letter |
+| PUT | /api/cover-letters/{id} | JWT | Cover Letter |
+| DELETE | /api/cover-letters/{id} | JWT | Cover Letter |
+| GET | /api/interviews/sessions | JWT | Interview |
+| POST | /api/interviews/generate | JWT | Interview |
+| POST | /api/interviews/mock/start | JWT | Interview |
+| POST | /api/interviews/mock/respond | JWT | Interview |
+| POST | /api/interviews/mock/end | JWT | Interview |
+| POST | /api/interviews/evaluate | JWT | Interview |
+| GET | /api/interviews/sessions/{id} | JWT | Interview |
+| DELETE | /api/interviews/sessions/{id} | JWT | Interview |
+| GET | /api/analytics/dashboard | JWT | Analytics |
+| GET | /api/user/me | JWT | User |
+| PUT | /api/user/me | JWT | User |
+| PUT | /api/user/password | JWT | User |
+| GET | /api/user/settings | JWT | User |
+| PUT | /api/user/settings | JWT | User |
+
+---
+
+## 5. Database Schema
+
+9 Flyway migrations (V1 → V9):
+
+| Migration | Tables | Phase |
+|---|---|---|
+| V1 | users, resumes, job_descriptions, applications, interview_sessions, cover_letters, refresh_tokens, password_reset_tokens | A/B |
+| V2 | resumes: +parsing_status, error_message, is_active, file_size, mime_type | D |
+| V3 | resumes: +parsed_at, parse_attempts | D/G |
+| V4 | job_descriptions: +analysis_status, analyzed_at, analysis_attempts, error_message, structured_data | E |
+| V5 | cover_letters: +resume_id, title, tone, template, company_name, hiring_manager, recipient_title, is_active | G |
+| V6 | interview_sessions: +resume_id, title, difficulty, status, question_count, answered_count, updated_at | H |
+| V7 | user_settings (new table) | K |
+| V8 | jobs (new table) | I |
+| V9 | users: +failed_login_attempts, locked_until | 19–20 |
+
+---
+
+## 6. Test Coverage
+
+**286 total tests** — All passing (0 failures, 0 errors).
+
+Covers: AuthService, ResumeService, JobDescriptionService, MatchService, TailorValidatorService, ScoreExplanationService, RecommendationService, UserService, InterviewService, CoverLetterService, AnalyticsService.
+
+Integration tests use Testcontainers (disposable PostgreSQL). AI tests use the `mock` provider (no Gemini API key required).
+
+*Run test breakdown: `mvn clean test` → view Surefire reports in `target/surefire-reports/`*
+
+---
+
+## 7. Documentation Status
+
+| Document | Location | Status |
+|---|---|---|
+| Project Manifest | `docs/PROJECT/00_PROJECT_MANIFEST.md` | ✅ Complete |
+| Product Requirements | `docs/PROJECT/01_PRODUCT_REQUIREMENTS.md` | ✅ Complete |
+| Roadmap | `docs/PROJECT/02_ROADMAP.md` | ✅ Complete |
+| Changelog | `docs/PROJECT/03_CHANGELOG.md` | ✅ Complete |
+| Product Decisions (ADRs) | `docs/PROJECT/04_PRODUCT_DECISIONS.md` | ✅ Complete |
+| User Personas | `docs/PROJECT/05_USER_PERSONAS.md` | ✅ Complete |
+| Success Metrics | `docs/PROJECT/06_SUCCESS_METRICS.md` | ✅ Complete |
+| Portfolio Release Checklist | `docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md` | ✅ Complete |
+| Engineering Constitution | `docs/AI_ENGINEERING/01_ENGINEERING_CONSTITUTION.md` | ✅ Complete |
+| Product DNA | `docs/AI_ENGINEERING/02_PRODUCT_DNA.md` | ✅ Complete |
+| Architecture Rules | `docs/AI_ENGINEERING/03_ARCHITECTURE_RULES.md` | ✅ Complete |
+| Design System | `docs/AI_ENGINEERING/04_DESIGN_SYSTEM.md` | ✅ Complete |
+| UI/UX Principles | `docs/AI_ENGINEERING/05_UI_UX_PRINCIPLES.md` | ✅ Complete |
+| Coding Standards | `docs/AI_ENGINEERING/06_CODING_STANDARDS.md` | ✅ Complete |
+| Code Review Checklist | `docs/AI_ENGINEERING/07_CODE_REVIEW_CHECKLIST.md` | ✅ Complete |
+| Sprint Workflow | `docs/AI_ENGINEERING/08_SPRINT_WORKFLOW.md` | ✅ Complete |
+| Definition of Done | `docs/AI_ENGINEERING/09_DEFINITION_OF_DONE.md` | ✅ Complete |
+| AI Agent Rules | `docs/AI_ENGINEERING/10_AI_AGENT_RULES.md` | ✅ Complete |
+| Deployment Env Guide | `docs/DEPLOYMENT/01_DEPLOYMENT_ENV_GUIDE.md` | ✅ Complete |
+| Local Setup Guide | `docs/DEPLOYMENT/02_LOCAL_SETUP_GUIDE.md` | ✅ Complete |
+| Production Setup Guide | `docs/DEPLOYMENT/03_PRODUCTION_SETUP_GUIDE.md` | ✅ Complete |
+| Deployment Checklist | `docs/DEPLOYMENT/04_DEPLOYMENT_CHECKLIST.md` | ✅ Complete |
+| Backend README | `backend/README.md` | ✅ Complete |
+| Frontend .env.example | `frontend/.env.example` | ✅ Complete |
+| Backend .env.example | `backend/.env.example` | ✅ Complete |
+| Root README | `README.md` | ✅ Complete |
+| Project Status | `PROJECT_STATUS.md` | ✅ Complete |
+
+---
+
+## 8. Project Metrics
+
+| Metric | Value |
+|---|---|
+| Java source files | 90+ |
+| Frontend components | 80+ |
+| Frontend routes | 16 |
+| Flyway migrations | 9 |
+| Backend tests | 286 |
+| GitHub commits | 195+ |
+| Documentation files | 27 |

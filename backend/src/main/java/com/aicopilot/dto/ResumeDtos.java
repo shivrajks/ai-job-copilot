@@ -52,6 +52,8 @@ public class ResumeDtos {
         private Long fileSize;
         private String mimeType;
         private Integer atsScore;
+        private Integer parseAttempts;
+        private LocalDateTime parsedAt;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
     }
@@ -98,6 +100,8 @@ public class ResumeDtos {
                 .fileSize(resume.getFileSize())
                 .mimeType(resume.getMimeType())
                 .atsScore(resume.getAtsScore())
+                .parseAttempts(resume.getParseAttempts())
+                .parsedAt(resume.getParsedAt())
                 .createdAt(resume.getCreatedAt())
                 .updatedAt(resume.getUpdatedAt())
                 .build();

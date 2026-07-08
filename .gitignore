@@ -23,6 +23,14 @@ desktop.ini
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+env-setup.bat
+run-backend.bat
+
+# Local production config (may contain real secrets)
+application-prod.yml
+application-prod.properties
 
 # Logs
 logs/

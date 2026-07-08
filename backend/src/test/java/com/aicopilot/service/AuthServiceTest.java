@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -32,6 +33,7 @@ class AuthServiceTest {
     @Mock private PasswordResetTokenRepository passwordResetTokenRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtTokenProvider tokenProvider;
+    @Mock private EmailService emailService;
 
     @InjectMocks
     private AuthService authService;
@@ -56,7 +58,11 @@ class AuthServiceTest {
                 .email("test@example.com")
                 .password("encoded_password")
                 .fullName("Test User")
+                .failedLoginAttempts(0)
                 .build();
+
+        ReflectionTestUtils.setField(authService, "maxFailedAttempts", 5);
+        ReflectionTestUtils.setField(authService, "lockoutDurationMinutes", 15);
     }
 
     @Nested
@@ -156,6 +162,59 @@ class AuthServiceTest {
     }
 
     @Nested
+    @DisplayName("Login Lockout")
+    class LoginLockout {
+
+        @Test
+        @DisplayName("should lock account after max failed attempts")
+        void shouldLockAccountAfterMaxFailures() {
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
+            when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+            for (int i = 0; i < 5; i++) {
+                assertThatThrownBy(() -> authService.login(loginRequest))
+                        .isInstanceOf(AppException.class)
+                        .hasMessageContaining("Invalid email or password");
+            }
+
+            assertThat(testUser.getFailedLoginAttempts()).isEqualTo(5);
+            assertThat(testUser.getLockedUntil()).isNotNull();
+            verify(userRepository, times(5)).save(testUser);
+        }
+
+        @Test
+        @DisplayName("should throw lockout error when account is locked")
+        void shouldThrowLockoutWhenAccountLocked() {
+            testUser.setFailedLoginAttempts(5);
+            testUser.setLockedUntil(LocalDateTime.now().plusMinutes(15));
+
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
+
+            assertThatThrownBy(() -> authService.login(loginRequest))
+                    .isInstanceOf(AppException.class)
+                    .hasMessageContaining("Account temporarily locked");
+        }
+
+        @Test
+        @DisplayName("should reset failed attempts on successful login")
+        void shouldResetFailedAttemptsOnSuccess() {
+            testUser.setFailedLoginAttempts(3);
+            testUser.setLockedUntil(null);
+
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
+            when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+            when(tokenProvider.generateAccessToken(any(), anyString())).thenReturn("access_token");
+            when(tokenProvider.generateRefreshToken(any())).thenReturn("refresh_token");
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+            authService.login(loginRequest);
+
+            assertThat(testUser.getFailedLoginAttempts()).isZero();
+            assertThat(testUser.getLockedUntil()).isNull();
+        }
+    }
+
+    @Nested
     @DisplayName("Refresh Token")
     class RefreshTokenTests {
 
@@ -173,7 +232,7 @@ class AuthServiceTest {
                     .build();
 
             when(tokenProvider.validateRefreshToken("valid_refresh_token")).thenReturn(true);
-            when(refreshTokenRepository.findByToken("valid_refresh_token")).thenReturn(Optional.of(storedToken));
+            when(refreshTokenRepository.findByToken(anyString())).thenReturn(Optional.of(storedToken));
             when(tokenProvider.generateAccessToken(any(), anyString())).thenReturn("new_access_token");
             when(tokenProvider.generateRefreshToken(any())).thenReturn("new_refresh_token");
 
@@ -214,7 +273,7 @@ class AuthServiceTest {
                     .build();
 
             when(tokenProvider.validateRefreshToken("expired_token")).thenReturn(true);
-            when(refreshTokenRepository.findByToken("expired_token")).thenReturn(Optional.of(expiredToken));
+            when(refreshTokenRepository.findByToken(anyString())).thenReturn(Optional.of(expiredToken));
 
             assertThatThrownBy(() -> authService.refreshToken(request))
                     .isInstanceOf(AppException.class)
@@ -237,7 +296,7 @@ class AuthServiceTest {
                     .token("some_refresh_token")
                     .build();
 
-            when(refreshTokenRepository.findByToken("some_refresh_token")).thenReturn(Optional.of(storedToken));
+            when(refreshTokenRepository.findByToken(anyString())).thenReturn(Optional.of(storedToken));
 
             MessageResponse response = authService.logout(request);
 
@@ -251,7 +310,7 @@ class AuthServiceTest {
             LogoutRequest request = new LogoutRequest();
             request.setRefreshToken("unknown_token");
 
-            when(refreshTokenRepository.findByToken("unknown_token")).thenReturn(Optional.empty());
+            when(refreshTokenRepository.findByToken(anyString())).thenReturn(Optional.empty());
 
             MessageResponse response = authService.logout(request);
 

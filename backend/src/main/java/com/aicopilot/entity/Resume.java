@@ -1,5 +1,8 @@
 package com.aicopilot.entity;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,11 +37,19 @@ public class Resume {
     @Column(name = "parsed_content", columnDefinition = "TEXT")
     private String parsedContent;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "structured_data", columnDefinition = "JSONB")
     private String structuredData;
 
     @Column(name = "ats_score")
     private Integer atsScore;
+
+    @Column(name = "parsed_at")
+    private LocalDateTime parsedAt;
+
+    @Column(name = "parse_attempts")
+    @Builder.Default
+    private Integer parseAttempts = 0;
 
     @Column(name = "version_num")
     @Builder.Default

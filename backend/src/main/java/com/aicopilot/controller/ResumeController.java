@@ -63,6 +63,14 @@ public class ResumeController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/parse")
+    public ResponseEntity<ResumeDetail> parseResume(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+                resumeService.parseResume(getUserId(userDetails), id));
+    }
+
     @PostMapping("/{id}/activate")
     public ResponseEntity<ResumeDetail> setActiveResume(
             @PathVariable UUID id,
