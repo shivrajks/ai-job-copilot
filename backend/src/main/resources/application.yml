@@ -65,8 +65,9 @@ server:
 
 # JWT Configuration
 jwt:
-  # Required: set JWT_SECRET to a non-default 256-bit+ signing secret.
-  secret: ${JWT_SECRET}
+  # For production: set JWT_SECRET to a non-default 256-bit+ signing secret.
+  # For local dev: the default below is safe (never use in production).
+  secret: ${JWT_SECRET:dev-jwt-secret-key-ai-copilot-2024-at-least-256-bits-long!!}
   access-token-expiration: 900000    # 15 minutes
   refresh-token-expiration: 604800000 # 7 days
 

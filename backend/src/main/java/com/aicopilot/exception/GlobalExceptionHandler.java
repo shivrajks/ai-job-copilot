@@ -1,5 +1,6 @@
 package com.aicopilot.exception;
 
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import com.fasterxml.jackson.core.JsonParseException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,11 +22,11 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import org.springframework.beans.TypeMismatchException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -47,9 +48,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(response);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
         List<String> details = ex.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
                 .toList();
@@ -60,7 +62,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .message("Input validation failed")
                 .details(details)
                 .timestamp(LocalDateTime.now())
-                .path(request.getRequestURI())
+                .path(request.getDescription(false))
                 .build();
         return ResponseEntity.badRequest().body(response);
     }
@@ -136,16 +138,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(MissingServletRequestPartException.class)
-    public ResponseEntity<ErrorResponse> handleMissingPartException(
-            MissingServletRequestPartException ex, HttpServletRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestPart(
+            MissingServletRequestPartException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
         log.warn("Missing request part: {}", ex.getMessage());
         ErrorResponse response = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Bad Request")
                 .message("Required part '" + ex.getRequestPartName() + "' is missing")
                 .timestamp(LocalDateTime.now())
-                .path(request.getRequestURI())
+                .path(request.getDescription(false))
                 .build();
         return ResponseEntity.badRequest().body(response);
     }
@@ -164,9 +167,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex, HttpServletRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
         log.warn("Malformed request body: {}", ex.getMessage());
         String message = "Malformed JSON request body";
         if (ex.getCause() instanceof JsonParseException) {
@@ -177,7 +181,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .error("Bad Request")
                 .message(message)
                 .timestamp(LocalDateTime.now())
-                .path(request.getRequestURI())
+                .path(request.getDescription(false))
                 .build();
         return ResponseEntity.badRequest().body(response);
     }
@@ -196,20 +200,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
-            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        log.warn("Method argument type mismatch: {} for parameter '{}'", ex.getValue(), ex.getName());
-        String message = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
-        if (ex.getRequiredType() != null) {
-            message += ". Expected type: " + ex.getRequiredType().getSimpleName();
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+            TypeMismatchException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        if (ex instanceof MethodArgumentTypeMismatchException mx) {
+            log.warn("Method argument type mismatch: {} for parameter '{}'", mx.getValue(), mx.getName());
+            String message = "Invalid value '" + mx.getValue() + "' for parameter '" + mx.getName() + "'";
+            if (mx.getRequiredType() != null) {
+                message += ". Expected type: " + mx.getRequiredType().getSimpleName();
+            }
+            ErrorResponse response = ErrorResponse.builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .error("Bad Request")
+                    .message(message)
+                    .timestamp(LocalDateTime.now())
+                    .path(request.getDescription(false))
+                    .build();
+            return ResponseEntity.badRequest().body(response);
         }
         ErrorResponse response = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Bad Request")
-                .message(message)
+                .message("Invalid value for parameter")
                 .timestamp(LocalDateTime.now())
-                .path(request.getRequestURI())
+                .path(request.getDescription(false))
                 .build();
         return ResponseEntity.badRequest().body(response);
     }
