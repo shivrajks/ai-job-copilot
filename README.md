@@ -29,35 +29,20 @@
 
 ## Screenshots
 
-> *Screenshots coming soon.*  
-> *Full capture checklist: [`docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md`](docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md)*
+Product screenshots will be added after the app is run locally or deployed with sanitized demo data. These captures are planned to show the main recruiter-facing product flows without exposing environment details or private user information.
 
-<table>
-  <tr>
-    <td align="center"><b>Landing Hero</b></td>
-    <td align="center"><b>Dashboard</b></td>
-  </tr>
-  <tr>
-    <td align="center"><i>docs/assets/screenshots/landing-hero.png</i></td>
-    <td align="center"><i>docs/assets/screenshots/dashboard.png</i></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Resume Intelligence</b></td>
-    <td align="center"><b>ATS Score Engine</b></td>
-  </tr>
-  <tr>
-    <td align="center"><i>docs/assets/screenshots/resume-intelligence.png</i></td>
-    <td align="center"><i>docs/assets/screenshots/ats-score.png</i></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Application Tracker</b></td>
-    <td align="center"><b>Analytics Dashboard</b></td>
-  </tr>
-  <tr>
-    <td align="center"><i>docs/assets/screenshots/tracker.png</i></td>
-    <td align="center"><i>docs/assets/screenshots/analytics.png</i></td>
-  </tr>
-</table>
+> Screenshots should not contain secrets, API keys, database URLs, or real user data.
+> Full capture checklist: [`docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md`](docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md)
+
+| View | Caption | Planned Image Path |
+|---|---|---|
+| Landing Page | Public product positioning, value proposition, and primary calls to action. | `docs/screenshots/landing-page.png` |
+| Dashboard | Authenticated overview of resume, job, interview, and application activity. | `docs/screenshots/dashboard.png` |
+| Resume Upload | Resume ingestion flow with PDF/DOCX upload and validation feedback. | `docs/screenshots/resume-upload.png` |
+| ATS Score | Match score breakdown with keyword, experience, education, and formatting insights. | `docs/screenshots/ats-score.png` |
+| Application Tracker | Kanban/list workflow for managing applications, statuses, notes, and next actions. | `docs/screenshots/application-tracker.png` |
+| Analytics | Pipeline metrics, trends, recent activity, and performance summaries. | `docs/screenshots/analytics.png` |
+| Settings | Profile, account, preferences, and security-related settings. | `docs/screenshots/settings.png` |
 
 ---
 
