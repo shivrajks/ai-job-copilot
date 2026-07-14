@@ -23,7 +23,7 @@ export function TailorEducationCard({
     <div
       className={cn(
         'rounded-lg border overflow-hidden transition-colors',
-        accepted ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border bg-card'
+        accepted ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/[0.10] bg-card'
       )}
     >
       <div className="px-4 py-3 bg-accent/30 border-b border-border flex items-center justify-between">

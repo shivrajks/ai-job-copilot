@@ -52,7 +52,7 @@ function ApiTokenSync() {
     setOnAuthError(() => {
       clearAuth();
       setAuthCookie(null);
-      router.push('/auth/login');
+      router.replace('/auth/login');
     });
   }, [clearAuth, router]);
 

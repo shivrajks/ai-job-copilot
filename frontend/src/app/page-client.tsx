@@ -35,7 +35,7 @@ const pricingTiers = [
 
 export default function HomePageClient() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#F6F8FF] text-slate-950 transition-colors duration-500 dark:bg-[#050816] dark:text-white">
+    <div className="min-h-screen overflow-x-hidden bg-background text-foreground transition-colors duration-500">
       <SiteHeader />
 
       <main id="main-content" tabIndex={-1}>

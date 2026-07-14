@@ -25,6 +25,7 @@ export default function CoverLettersPageClient() {
     isGenerating,
     isSaving,
     error,
+    generateError,
     fetchCoverLetters,
     fetchCoverLetter,
     generateProposal,
@@ -33,6 +34,7 @@ export default function CoverLettersPageClient() {
     deleteCoverLetter,
     clearProposal,
     clearError,
+    clearGenerateError,
   } = useCoverLetterStore();
 
   const { resumes, fetchResumes } = useResumeStore();
@@ -145,7 +147,7 @@ export default function CoverLettersPageClient() {
               <ErrorState
                 title="Failed to load cover letters"
                 message={error}
-                onRetry={fetchCoverLetters}
+                onRetry={() => fetchCoverLetters({ force: true })}
               />
             )}
 
@@ -174,6 +176,14 @@ export default function CoverLettersPageClient() {
         <div className="flex-1 min-w-0">
           {isGenerating && !proposal && (
             <CoverLetterProgress />
+          )}
+
+          {generateError && !isGenerating && !proposal && (
+            <ErrorState
+              title="Generation failed"
+              message={generateError}
+              onRetry={() => clearGenerateError()}
+            />
           )}
 
           {proposal && !isGenerating && (
@@ -215,7 +225,7 @@ export default function CoverLettersPageClient() {
           )}
 
           {!selectedLetter && !proposal && !isGenerating && (
-            <div className="flex items-center justify-center h-64 rounded-lg border border-dashed border-border">
+            <div className="flex items-center justify-center h-64 rounded-xl border border-dashed border-border glass">
               <div className="text-center">
                 <Sparkles className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">

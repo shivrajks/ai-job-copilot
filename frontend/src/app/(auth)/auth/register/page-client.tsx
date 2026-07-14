@@ -103,6 +103,7 @@ export default function RegisterPageClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
         onSubmit={handleSubmit}
+        noValidate
         className="glass rounded-xl p-6 space-y-4"
       >
         {error && (
@@ -272,9 +273,7 @@ export default function RegisterPageClient() {
           transition={{ delay: 0.45 }}
           className="text-center text-xs text-muted-foreground"
         >
-          By creating an account, you agree to our{' '}
-          <a href="#" className="text-primary hover:underline">Terms</a> and{' '}
-          <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+          By creating an account, you agree to use AI Job Copilot responsibly.
         </motion.p>
 
         <motion.p

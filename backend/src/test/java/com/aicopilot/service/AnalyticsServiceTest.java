@@ -102,7 +102,7 @@ class AnalyticsServiceTest {
             when(applicationRepository.countByUserId(userId)).thenReturn(10L);
             when(applicationRepository.countByUserIdAndCreatedAtBetween(any(), any(), any())).thenReturn(2L);
             when(applicationRepository.countByStage(userId)).thenReturn(
-                    List.<Object[]>of(new Object[]{"APPLIED", 5L}, new Object[]{"OFFER", 1L}));
+                    List.<Object[]>of(new Object[]{Application.Stage.APPLIED, 5L}, new Object[]{Application.Stage.OFFER, 1L}));
             when(applicationRepository.countByCompany(userId)).thenReturn(
                     List.<Object[]>of(new Object[]{"Acme Corp", 3L}));
             when(applicationRepository.countByUserIdAndStage(eq(userId), any(Application.Stage.class))).thenReturn(1L);

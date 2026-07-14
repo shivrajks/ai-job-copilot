@@ -160,7 +160,10 @@ public final class InterviewDtos {
                             roleTitle = info.get("title").asText();
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                companyName = null;
+                roleTitle = null;
+            }
         }
         return SessionListItem.builder()
                 .id(session.getId())

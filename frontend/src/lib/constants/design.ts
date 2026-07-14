@@ -48,10 +48,9 @@ export const designTokens = {
   },
 
   glass: {
-    card: 'bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10',
-    nav: 'bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-border',
-    elevated:
-      'bg-white/80 dark:bg-white/10 backdrop-blur-2xl border border-white/30 dark:border-white/15 shadow-xl',
+    card: 'glass',
+    nav: 'glass-nav',
+    elevated: 'glass-elevated',
   },
 
   container: {

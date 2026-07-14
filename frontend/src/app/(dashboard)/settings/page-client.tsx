@@ -184,11 +184,11 @@ export default function SettingsPageClient() {
       const { api } = await import('@/lib/api/client');
       await api.post('/api/auth/logout-all');
       logoutAll();
-      router.push('/auth/login');
+      router.replace('/auth/login');
     } catch {
       // proceed with local logout even if API fails
       logoutAll();
-      router.push('/auth/login');
+      router.replace('/auth/login');
     }
   }, [logoutAll, router]);
 
@@ -356,9 +356,8 @@ export default function SettingsPageClient() {
                     onClick={() =>
                       setShowPassword((prev) => ({ ...prev, current: !prev.current }))
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground"
                     aria-label={showPassword.current ? 'Hide password' : 'Show password'}
-                    tabIndex={-1}
                   >
                     {showPassword.current ? (
                       <EyeOff className="h-4 w-4" />
@@ -391,9 +390,8 @@ export default function SettingsPageClient() {
                     onClick={() =>
                       setShowPassword((prev) => ({ ...prev, new: !prev.new }))
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground"
                     aria-label={showPassword.new ? 'Hide password' : 'Show password'}
-                    tabIndex={-1}
                   >
                     {showPassword.new ? (
                       <EyeOff className="h-4 w-4" />
@@ -408,7 +406,7 @@ export default function SettingsPageClient() {
                   </p>
                 )}
                 {passwordForm.newPassword.length >= 8 && (
-                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <Check className="h-3 w-3" /> Strong password
                   </p>
                 )}
@@ -435,9 +433,8 @@ export default function SettingsPageClient() {
                     onClick={() =>
                       setShowPassword((prev) => ({ ...prev, confirm: !prev.confirm }))
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground"
                     aria-label={showPassword.confirm ? 'Hide password' : 'Show password'}
-                    tabIndex={-1}
                   >
                     {showPassword.confirm ? (
                       <EyeOff className="h-4 w-4" />
@@ -450,7 +447,7 @@ export default function SettingsPageClient() {
                   <p className="text-xs text-destructive">Passwords do not match</p>
                 )}
                 {passwordTouched && passwordMatch && (
-                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <Check className="h-3 w-3" /> Passwords match
                   </p>
                 )}

@@ -85,8 +85,6 @@ interface StatCard {
 
 export default function DashboardPageClient() {
   const user = useAuthStore((s) => s.user);
-  const hasFetchedApps = useRef(false);
-  const hasFetchedJds = useRef(false);
 
   const applications = useApplicationStore((s) => s.applications);
   const appIsLoading = useApplicationStore((s) => s.isLoading);
@@ -95,25 +93,18 @@ export default function DashboardPageClient() {
   const clearAppError = useApplicationStore((s) => s.clearError);
 
   const fetchJobDescriptions = useJobDescriptionStore((s) => s.fetchJobDescriptions);
-  const jdIsLoading = useJobDescriptionStore((s) => s.isLoading);
 
   useEffect(() => {
-    if (!hasFetchedApps.current && applications.length === 0 && !appIsLoading) {
-      hasFetchedApps.current = true;
-      fetchApplications();
-    }
-  }, [fetchApplications, applications.length, appIsLoading]);
+    fetchApplications();
+  }, [fetchApplications]);
 
   useEffect(() => {
-    if (!hasFetchedJds.current && !jdIsLoading) {
-      hasFetchedJds.current = true;
-      fetchJobDescriptions();
-    }
-  }, [fetchJobDescriptions, jdIsLoading]);
+    fetchJobDescriptions();
+  }, [fetchJobDescriptions]);
 
   const handleRefresh = useCallback(() => {
-    fetchApplications();
-    fetchJobDescriptions();
+    fetchApplications({ force: true });
+    fetchJobDescriptions({ force: true });
   }, [fetchApplications, fetchJobDescriptions]);
 
   const stats: StatCard[] = useMemo(() => {
@@ -191,7 +182,7 @@ export default function DashboardPageClient() {
         >
           {appIsLoading && applications.length === 0 ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="glass rounded-xl p-4 md:p-5 space-y-3">
+              <div key={i} className="glass surface-highlight rounded-xl p-4 md:p-5 space-y-3">
                 <Skeleton className="h-3 w-16" />
                 <Skeleton className="h-7 w-12" />
                 <Skeleton className="h-3 w-20" />
@@ -204,7 +195,7 @@ export default function DashboardPageClient() {
               return (
                 <motion.div
                   key={stat.id}
-                  className="glass rounded-xl p-4 md:p-5 group"
+                  className="glass-elevated surface-highlight rounded-xl p-4 md:p-5 group"
                   aria-label={`${stat.label}: ${stat.value}`}
                   whileHover={{ y: -2, transition: { duration: 0.2 } }}
                 >
@@ -222,7 +213,7 @@ export default function DashboardPageClient() {
         </motion.div>
 
         {/* Quick Actions */}
-        <motion.div variants={fadeUp} className="glass rounded-xl p-4 md:p-6 mb-6 md:mb-8">
+        <motion.div variants={fadeUp} className="glass-elevated surface-highlight rounded-xl p-4 md:p-6 mb-6 md:mb-8">
           <h2 className="font-semibold mb-3 md:mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             {quickActions.map((action) => (
@@ -252,7 +243,7 @@ export default function DashboardPageClient() {
           {/* Resume Overview */}
           <motion.div
             whileHover={{ y: -2, transition: { duration: 0.2 } }}
-            className="glass rounded-xl p-4 md:p-6"
+            className="glass-elevated surface-highlight rounded-xl p-4 md:p-6"
             role="region"
             aria-labelledby="widget-resume-heading"
           >
@@ -266,7 +257,7 @@ export default function DashboardPageClient() {
           {/* Application Progress */}
           <motion.div
             whileHover={{ y: -2, transition: { duration: 0.2 } }}
-            className="glass rounded-xl p-4 md:p-6"
+            className="glass-elevated surface-highlight rounded-xl p-4 md:p-6"
             role="region"
             aria-labelledby="widget-apps-heading"
           >
@@ -280,7 +271,7 @@ export default function DashboardPageClient() {
           {/* Job Descriptions */}
           <motion.div
             whileHover={{ y: -2, transition: { duration: 0.2 } }}
-            className="glass rounded-xl p-4 md:p-6"
+            className="glass-elevated surface-highlight rounded-xl p-4 md:p-6"
             role="region"
             aria-labelledby="widget-jd-heading"
           >
@@ -296,7 +287,7 @@ export default function DashboardPageClient() {
         <motion.div
           variants={fadeUp}
           whileHover={{ y: -2, transition: { duration: 0.2 } }}
-          className="glass rounded-xl p-4 md:p-6 mb-6 md:mb-8"
+          className="glass-elevated surface-highlight rounded-xl p-4 md:p-6 mb-6 md:mb-8"
           role="region"
           aria-labelledby="widget-recent-apps-heading"
         >
@@ -311,9 +302,9 @@ export default function DashboardPageClient() {
         <motion.div
           variants={fadeUp}
           whileHover={{ y: -2, transition: { duration: 0.2 } }}
-          className="glass rounded-xl p-4 md:p-6"
+          className="glass-elevated surface-highlight rounded-xl p-4 md:p-6"
           role="region"
-          aria-labelledby="widget-jd-heading"
+          aria-labelledby="widget-recent-jds-heading"
         >
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-muted-foreground" aria-hidden="true" />

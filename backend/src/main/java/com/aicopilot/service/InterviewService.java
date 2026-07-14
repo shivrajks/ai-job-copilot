@@ -302,7 +302,9 @@ public class InterviewService {
             if (root.has("questions") && root.get("questions").isArray()) {
                 return root.get("questions").size();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            return 0;
+        }
         return 0;
     }
 }

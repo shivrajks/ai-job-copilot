@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -38,6 +38,9 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.10.0",
     "eslint-config-next": "15.5.19",
-    "postcss": "^8.4.45"
+    "postcss": "^8.5.10"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
   }
 }

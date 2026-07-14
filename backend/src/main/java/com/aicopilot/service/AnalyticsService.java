@@ -61,7 +61,7 @@ public class AnalyticsService {
         List<Object[]> stageRaw = applicationRepository.countByStage(userId);
         List<StageCount> byStage = stageRaw.stream()
                 .map(row -> StageCount.builder()
-                        .stage((String) row[0])
+                        .stage(row[0] instanceof com.aicopilot.entity.Application.Stage stage ? stage.name() : String.valueOf(row[0]))
                         .count((Long) row[1])
                         .build())
                 .collect(Collectors.toList());

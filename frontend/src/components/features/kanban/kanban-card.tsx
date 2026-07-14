@@ -66,7 +66,7 @@ export function KanbanCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative rounded-lg border border-border bg-card p-3 transition-shadow',
+        'group relative rounded-lg border border-white/[0.10] bg-card p-3 transition-shadow',
         isDragging ? 'shadow-xl opacity-90' : 'shadow-sm hover:shadow-md',
         isSelected && 'ring-2 ring-primary'
       )}

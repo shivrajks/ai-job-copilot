@@ -28,7 +28,7 @@ export function CoverLetterCard({
         'hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary/30',
         isSelected
           ? 'bg-primary/5 border-primary/30'
-          : 'bg-card border-border'
+          : 'bg-card border-white/[0.10]'
       )}
       aria-current={isSelected ? 'true' : undefined}
     >

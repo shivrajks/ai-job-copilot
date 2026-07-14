@@ -2,17 +2,26 @@ import { create } from 'zustand';
 import { toast } from 'sonner';
 import type { ResumeListItem, ResumeDetail, UploadResponse } from '@/types/resume';
 import { ApiError } from '@/lib/api/client';
+import { normalizeError } from '@/lib/api/errors';
 import * as resumeApi from '@/lib/api/resumes';
+
+interface FetchOptions {
+  force?: boolean;
+}
+
+let fetchGeneration = 0;
+let fetchResumesPromise: Promise<void> | null = null;
 
 interface ResumeState {
   resumes: ResumeListItem[];
   activeResume: ResumeDetail | null;
   isLoading: boolean;
+  hasFetched: boolean;
   isUploading: boolean;
   isParsing: boolean;
   error: string | null;
 
-  fetchResumes: () => Promise<void>;
+  fetchResumes: (options?: FetchOptions) => Promise<void>;
   uploadResume: (file: File) => Promise<UploadResponse>;
   deleteResume: (id: string) => Promise<void>;
   renameResume: (id: string, name: string) => Promise<void>;
@@ -25,36 +34,54 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   resumes: [],
   activeResume: null,
   isLoading: false,
+  hasFetched: false,
   isUploading: false,
   isParsing: false,
   error: null,
 
-  fetchResumes: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const resumes = await resumeApi.fetchResumes();
-      set({ resumes, isLoading: false });
-    } catch (err) {
-      set({
-        isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to load resumes',
-      });
-    }
+  fetchResumes: async (options) => {
+    const { force = false } = options ?? {};
+    const state = get();
+    if (state.isLoading) return fetchResumesPromise ?? undefined;
+    if (state.hasFetched && !force) return;
+
+    const myGeneration = ++fetchGeneration;
+
+    fetchResumesPromise = (async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const resumes = await resumeApi.fetchResumes();
+        if (fetchGeneration !== myGeneration) return;
+        set({ resumes, isLoading: false, hasFetched: true });
+      } catch (err) {
+        if (fetchGeneration !== myGeneration) return;
+        set({
+          isLoading: false,
+          error: normalizeError(err, 'Failed to load resumes'),
+        });
+      } finally {
+        if (fetchGeneration === myGeneration) {
+          fetchResumesPromise = null;
+        }
+      }
+    })();
+
+    return fetchResumesPromise;
   },
 
   uploadResume: async (file: File) => {
     set({ isUploading: true, error: null });
     try {
       const response = await resumeApi.uploadResume(file);
-      await get().fetchResumes();
+      await get().fetchResumes({ force: true });
       set({ isUploading: false });
       toast.success('Resume uploaded successfully');
       return response;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Something went wrong');
+      toast.error(normalizeError(err));
       set({
         isUploading: false,
-        error: err instanceof Error ? err.message : 'Failed to upload resume',
+        error: normalizeError(err, 'Failed to upload resume'),
       });
       throw err;
     }
@@ -80,9 +107,9 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         return;
       }
 
-      toast.error(err instanceof Error ? err.message : 'Something went wrong');
+      toast.error(normalizeError(err));
       set({
-        error: err instanceof Error ? err.message : 'Failed to delete resume',
+        error: normalizeError(err, 'Failed to delete resume'),
       });
       throw err;
     }
@@ -101,9 +128,9 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
       }));
       toast.success('Resume renamed successfully');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Something went wrong');
+      toast.error(normalizeError(err));
       set({
-        error: err instanceof Error ? err.message : 'Failed to rename resume',
+        error: normalizeError(err, 'Failed to rename resume'),
       });
       throw err;
     }
@@ -121,9 +148,9 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
       }));
       toast.success('Active resume updated');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Something went wrong');
+      toast.error(normalizeError(err));
       set({
-        error: err instanceof Error ? err.message : 'Failed to set active resume',
+        error: normalizeError(err, 'Failed to set active resume'),
       });
       throw err;
     }
@@ -146,7 +173,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
     } catch (err) {
       set({
         isParsing: false,
-        error: err instanceof Error ? err.message : 'Failed to parse resume',
+        error: normalizeError(err, 'Failed to parse resume'),
       });
       throw err;
     }
@@ -154,3 +181,17 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+export function resetResumeStore() {
+  fetchGeneration++;
+  fetchResumesPromise = null;
+  useResumeStore.setState({
+    resumes: [],
+    activeResume: null,
+    isLoading: false,
+    hasFetched: false,
+    isUploading: false,
+    isParsing: false,
+    error: null,
+  });
+}

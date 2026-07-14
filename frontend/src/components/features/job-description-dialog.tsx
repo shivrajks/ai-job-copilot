@@ -67,6 +67,18 @@ export function JobDescriptionDialog({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [open, onCancel]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [open]);
+
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!title.trim()) newErrors.title = 'Title is required';
@@ -110,12 +122,12 @@ export function JobDescriptionDialog({
             aria-labelledby="jd-dialog-title"
             aria-modal="true"
             className={cn(
-              'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50',
-              'w-full max-w-xl p-6 rounded-xl glass-elevated',
-              'max-h-[90vh] overflow-y-auto'
+              'fixed inset-x-4 top-4 bottom-4 z-50 mx-auto',
+              'w-[calc(100vw-2rem)] max-w-xl rounded-xl glass-elevated overflow-hidden',
+              'flex flex-col'
             )}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.10] shrink-0">
               <h2 id="jd-dialog-title" className="text-lg font-semibold">
                 {mode === 'create' ? 'Add Job Description' : 'Edit Job Description'}
               </h2>
@@ -128,7 +140,8 @@ export function JobDescriptionDialog({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="jd-title">Title *</Label>
@@ -187,7 +200,9 @@ export function JobDescriptionDialog({
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              </div>
+
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-white/[0.10] shrink-0">
                 <Button type="button" variant="outline" size="sm" onClick={onCancel}>
                   Cancel
                 </Button>

@@ -355,7 +355,9 @@ public class MockInterviewAiService implements InterviewAiService {
                     && !root.get(parent).get(field).isNull()) {
                 return root.get(parent).get(field).asText();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            return fallback;
+        }
         return fallback;
     }
 }

@@ -22,11 +22,12 @@ public class MockAiService implements AiService {
 
         String structuredJson = generateMockJson(name);
 
+        // ponytail: mock returns failure so ResumeService routes to RuleBasedResumeParser
         return ParseResponse.builder()
                 .parsedContent(rawText)
                 .structuredData(structuredJson)
-                .success(true)
-                .errorMessage(null)
+                .success(false)
+                .errorMessage("Mock provider: rule-based parser will be used")
                 .build();
     }
 
