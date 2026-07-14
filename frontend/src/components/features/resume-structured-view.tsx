@@ -11,7 +11,11 @@ interface ResumeStructuredViewProps {
 export function ResumeStructuredView({ data }: ResumeStructuredViewProps) {
   const parsed: ResumeStructuredData | null = useMemo(() => {
     try {
-      return JSON.parse(data);
+      const raw = JSON.parse(data);
+      if (raw && typeof raw.summary === 'object' && raw.summary !== null) {
+        raw.summary = raw.summary.text ?? null;
+      }
+      return raw;
     } catch {
       return null;
     }

@@ -1,5 +1,6 @@
 package com.aicopilot.ai.parser;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -293,7 +294,8 @@ public class RuleBasedResumeParser {
         return url.matches(".*\\.[a-z]{2,3}$") && !url.contains("/");
     }
 
-    private ObjectNode extractSummary(Map<String, List<String>> sections) {
+    // ponytail: returns a string node, not {"text":"..."} — frontend renders summary as a plain string
+    private JsonNode extractSummary(Map<String, List<String>> sections) {
         for (Map.Entry<String, List<String>> entry : sections.entrySet()) {
             String key = entry.getKey();
             if (key.equals("summary") || key.equals("professional summary") ||
@@ -302,11 +304,11 @@ public class RuleBasedResumeParser {
                         .filter(l -> !l.isEmpty())
                         .collect(Collectors.joining(" "));
                 if (!text.isBlank()) {
-                    return MAPPER.createObjectNode().put("text", text);
+                    return MAPPER.getNodeFactory().textNode(text);
                 }
             }
         }
-        return MAPPER.createObjectNode().putNull("text");
+        return MAPPER.getNodeFactory().nullNode();
     }
 
     private ArrayNode extractSkills(Map<String, List<String>> sections) {

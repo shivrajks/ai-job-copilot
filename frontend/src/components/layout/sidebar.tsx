@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import {
   LayoutDashboard,
@@ -39,6 +39,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +62,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     );
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
+    requestAnimationFrame(() => first?.focus());
     function trap(e: KeyboardEvent) {
       if (e.key !== 'Tab') return;
       if (e.shiftKey) {
@@ -77,8 +79,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     <aside
       id="sidebar-navigation"
       className={cn(
-        'w-64 border-r border-border bg-card flex flex-col h-full',
+        'w-64 flex flex-col h-full',
         'lg:fixed lg:h-full lg:z-[40]',
+        'bg-card/80 backdrop-blur-xl border-r border-white/[0.10]',
       )}
       role="navigation"
       aria-label="Main navigation"
@@ -109,10 +112,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group',
+                  'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 group',
                   isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/70',
+                    ? 'bg-primary/[0.12] text-primary font-medium shadow-sm shadow-primary/[0.08]'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.06]',
                 )}
               >
                 {isActive && (
@@ -143,8 +146,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </p>
           </div>
           <button
-            onClick={() => logout()}
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            onClick={() => { logout(); router.replace('/auth/login'); }}
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors shrink-0 rounded-lg"
             aria-label="Sign out"
           >
             <LogOut className="w-4 h-4" />

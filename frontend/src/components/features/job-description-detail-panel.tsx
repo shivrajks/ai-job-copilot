@@ -95,9 +95,10 @@ export function JobDescriptionDetailPanel({
     if (jd) {
       previousFocusRef.current = document.activeElement as HTMLElement;
       fetchDetail(jd.id);
+      fetchResumes();
       requestAnimationFrame(() => closeBtnRef.current?.focus());
     }
-  }, [jd, fetchDetail]);
+  }, [jd, fetchDetail, fetchResumes]);
 
   const handleTailor = useCallback(async () => {
     if (!detail || !activeResume) return;
@@ -114,7 +115,7 @@ export function JobDescriptionDetailPanel({
     if (!activeResume) return;
     try {
       await saveTailored(activeResume.id, name);
-      await fetchResumes();
+      await fetchResumes({ force: true });
       setIsSaveDialogOpen(false);
       clearTailor();
       setAriaMessage('Tailored resume saved');
@@ -461,7 +462,7 @@ export function JobDescriptionDetailPanel({
                     onClose={() => setIsCLDialogOpen(false)}
                   />
 
-                  <div className="flex items-center gap-2 pt-4 border-t border-border">
+                  <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-border">
                     {detail.analysisStatus !== 'PROCESSING' && (
                       <Button
                         variant="default"

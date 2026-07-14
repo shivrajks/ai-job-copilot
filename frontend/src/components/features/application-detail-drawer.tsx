@@ -101,12 +101,12 @@ export function ApplicationDetailDrawer({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-lg bg-card border-l border-border z-50 shadow-2xl overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-full max-w-lg bg-card/95 backdrop-blur-xl border-l border-white/[0.10] z-50 shadow-2xl overflow-y-auto"
             role="dialog"
             aria-modal="true"
             aria-label="Application details"
           >
-            <div className="sticky top-0 bg-card border-b border-border z-10 flex items-center justify-between p-4">
+            <div className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-white/[0.10] z-10 flex items-center justify-between p-4">
               <h2 className="text-lg font-semibold">Application Details</h2>
               <button
                 onClick={onClose}

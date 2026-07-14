@@ -15,6 +15,20 @@ A full-stack job-search assistant that helps users manage resumes, compare them 
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)
 
+Product screenshots will be added after the app is run locally or deployed with sanitized demo data. These captures are planned to show the main recruiter-facing product flows without exposing environment details or private user information.
+
+> Screenshots should not contain secrets, API keys, database URLs, or real user data.
+> Full capture checklist: [`docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md`](docs/PROJECT/07_PORTFOLIO_RELEASE_CHECKLIST.md)
+
+| View | Caption | Planned Image Path |
+|---|---|---|
+| Landing Page | Public product positioning, value proposition, and primary calls to action. | `docs/screenshots/landing-page.png` |
+| Dashboard | Authenticated overview of resume, job, interview, and application activity. | `docs/screenshots/dashboard.png` |
+| Resume Upload | Resume ingestion flow with PDF/DOCX upload and validation feedback. | `docs/screenshots/resume-upload.png` |
+| ATS Score | Match score breakdown with keyword, experience, education, and formatting insights. | `docs/screenshots/ats-score.png` |
+| Application Tracker | Kanban/list workflow for managing applications, statuses, notes, and next actions. | `docs/screenshots/application-tracker.png` |
+| Analytics | Pipeline metrics, trends, recent activity, and performance summaries. | `docs/screenshots/analytics.png` |
+| Settings | Profile, account, preferences, and security-related settings. | `docs/screenshots/settings.png` |
 </div>
 
 ---

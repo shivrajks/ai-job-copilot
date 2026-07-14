@@ -57,6 +57,18 @@ export function CoverLetterGenerateDialog({
 
   useEffect(() => {
     if (!isOpen) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
     const dialog = dialogRef.current;
     if (!dialog) return;
     const focusable = dialog.querySelectorAll<HTMLElement>(
@@ -114,12 +126,12 @@ export function CoverLetterGenerateDialog({
             aria-modal="true"
             aria-labelledby="cl-generate-title"
             className={cn(
-              'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50',
-              'w-full max-w-md bg-background border border-border rounded-xl shadow-2xl',
-              'p-6'
+              'fixed inset-x-4 top-4 bottom-4 z-50 mx-auto',
+              'w-[calc(100vw-2rem)] max-w-md rounded-xl glass-elevated overflow-hidden',
+              'flex flex-col'
             )}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.10] shrink-0">
               <h2 id="cl-generate-title" className="text-lg font-semibold">
                 Generate Cover Letter
               </h2>
@@ -134,7 +146,8 @@ export function CoverLetterGenerateDialog({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4 space-y-4">
               <div className="px-3 py-2 rounded-lg bg-muted/50 text-sm text-muted-foreground">
                 Using resume: <span className="font-medium text-foreground">{resumeName}</span>
               </div>
@@ -233,7 +246,9 @@ export function CoverLetterGenerateDialog({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              </div>
+
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.10] shrink-0">
                 <button
                   type="button"
                   onClick={handleClose}

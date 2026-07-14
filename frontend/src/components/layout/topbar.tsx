@@ -40,7 +40,7 @@ export function Topbar({ onMenuToggle, isSidebarOpen }: TopbarProps) {
   }, [pathname, title]);
 
   return (
-    <header className="h-16 border-b border-border bg-white/70 dark:bg-background/80 backdrop-blur-xl flex items-center px-4 lg:px-6 gap-3 transition-colors duration-300">
+    <header className="h-16 glass-nav flex items-center px-4 lg:px-6 gap-3">
       <button
         onClick={onMenuToggle}
         className="lg:hidden text-muted-foreground hover:text-foreground transition-colors -ml-1"

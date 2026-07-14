@@ -10,14 +10,22 @@ import type {
 } from '@/types/application';
 import * as applicationApi from '@/lib/api/applications';
 
+interface FetchOptions {
+  force?: boolean;
+}
+
+let fetchGeneration = 0;
+let fetchApplicationsPromise: Promise<void> | null = null;
+
 interface ApplicationState {
   applications: ApplicationListItem[];
   selectedApplication: ApplicationDetail | null;
   isLoading: boolean;
+  hasFetched: boolean;
   error: string | null;
   selectedIds: Set<string>;
 
-  fetchApplications: () => Promise<void>;
+  fetchApplications: (options?: FetchOptions) => Promise<void>;
   getApplication: (id: string) => Promise<ApplicationDetail>;
   createApplication: (data: CreateApplicationRequest) => Promise<ApplicationDetail>;
   updateApplication: (id: string, data: UpdateApplicationRequest) => Promise<ApplicationDetail>;
@@ -35,20 +43,38 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
   applications: [],
   selectedApplication: null,
   isLoading: false,
+  hasFetched: false,
   error: null,
   selectedIds: new Set(),
 
-  fetchApplications: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const applications = await applicationApi.fetchApplications();
-      set({ applications, isLoading: false });
-    } catch (err) {
-      set({
-        isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to load applications',
-      });
-    }
+  fetchApplications: async (options) => {
+    const { force = false } = options ?? {};
+    const state = get();
+    if (state.isLoading) return fetchApplicationsPromise ?? undefined;
+    if (state.hasFetched && !force) return;
+
+    const myGeneration = ++fetchGeneration;
+
+    fetchApplicationsPromise = (async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const applications = await applicationApi.fetchApplications();
+        if (fetchGeneration !== myGeneration) return;
+        set({ applications, isLoading: false, hasFetched: true });
+      } catch (err) {
+        if (fetchGeneration !== myGeneration) return;
+        set({
+          isLoading: false,
+          error: err instanceof Error ? err.message : 'Failed to load applications',
+        });
+      } finally {
+        if (fetchGeneration === myGeneration) {
+          fetchApplicationsPromise = null;
+        }
+      }
+    })();
+
+    return fetchApplicationsPromise;
   },
 
   getApplication: async (id: string) => {
@@ -69,8 +95,25 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const application = await applicationApi.createApplication(data);
-      await get().fetchApplications();
-      set({ isLoading: false });
+      set((state) => ({
+        isLoading: false,
+        applications: state.hasFetched
+          ? [
+              {
+                id: application.id,
+                company: application.company,
+                role: application.role,
+                location: application.location,
+                stage: application.stage,
+                resumeId: application.resumeId,
+                resumeName: application.resumeName,
+                appliedAt: application.appliedAt,
+                createdAt: application.createdAt,
+              },
+              ...state.applications,
+            ]
+          : state.applications,
+      }));
       toast.success('Application added successfully');
       return application;
     } catch (err) {
@@ -227,3 +270,16 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+export function resetApplicationsStore() {
+  fetchGeneration++;
+  fetchApplicationsPromise = null;
+  useApplicationStore.setState({
+    applications: [],
+    selectedApplication: null,
+    isLoading: false,
+    hasFetched: false,
+    error: null,
+    selectedIds: new Set(),
+  });
+}

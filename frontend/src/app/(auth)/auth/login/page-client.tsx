@@ -53,7 +53,7 @@ export default function LoginPageClient() {
         user: { id: string; email: string; fullName: string; avatarUrl?: string; planTier: string };
       }>('/api/auth/login', { email: email.trim(), password });
       setAuth(data.accessToken, data.refreshToken, data.user);
-      router.push('/dashboard');
+      router.replace('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
@@ -88,6 +88,7 @@ export default function LoginPageClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
         onSubmit={handleSubmit}
+        noValidate
         className="glass rounded-xl p-6 space-y-4"
       >
         {error && (

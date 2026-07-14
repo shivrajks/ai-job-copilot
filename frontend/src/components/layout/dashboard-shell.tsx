@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import { SkipToContent } from '@/components/shared/skip-to-content';
-import { pageTransition } from '@/lib/animations/variants';
 import { cn } from '@/lib/utils';
+
+// ponytail: AnimatePresence mode="wait" blocked every route transition for ~0.5s.
+// Re-render children directly — sidebar/topbar persist, page content swaps instantly.
 
 interface DashboardShellProps {
   children: ReactNode;
@@ -16,14 +16,17 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, className }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div className="min-h-screen bg-background">
+      {/* Ambient radial glow — adds depth without being distracting */}
       <div
-        className="fixed inset-0 bg-gradient-to-br from-transparent via-background to-primary/[0.02] pointer-events-none -z-0"
+        className="fixed inset-0 pointer-events-none -z-0"
         aria-hidden="true"
-      />
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/[0.08] rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[400px] bg-primary/[0.05] rounded-full blur-[120px]" />
+      </div>
       <SkipToContent contentId="dashboard-main" />
 
       <Sidebar
@@ -38,17 +41,7 @@ export function DashboardShell({ children, className }: DashboardShellProps) {
           id="dashboard-main"
           className={cn('flex-1 p-4 md:p-6 lg:p-8 transition-colors duration-300', className)}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              variants={pageTransition}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {children}
         </main>
       </div>
     </div>

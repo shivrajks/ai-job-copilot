@@ -10,6 +10,13 @@ import type {
 } from '@/types/interview';
 import * as interviewApi from '@/lib/api/interviews';
 
+interface FetchOptions {
+  force?: boolean;
+}
+
+let fetchGeneration = 0;
+let fetchSessionsPromise: Promise<void> | null = null;
+
 interface InterviewState {
   sessions: SessionListItem[];
   currentSession: SessionDetail | null;
@@ -17,11 +24,12 @@ interface InterviewState {
   feedback: InterviewFeedback[] | null;
   overallScore: number | null;
   isLoading: boolean;
+  hasFetched: boolean;
   isGenerating: boolean;
   isScoring: boolean;
   error: string | null;
 
-  fetchSessions: () => Promise<void>;
+  fetchSessions: (options?: FetchOptions) => Promise<void>;
   fetchSession: (id: string) => Promise<void>;
   generateSession: (params: GenerateInterviewRequest) => Promise<SessionDetail>;
   saveAnswer: (questionId: string, answer: string) => void;
@@ -38,35 +46,55 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
   feedback: null,
   overallScore: null,
   isLoading: false,
+  hasFetched: false,
   isGenerating: false,
   isScoring: false,
   error: null,
 
-  fetchSessions: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const sessions = await interviewApi.fetchSessions();
-      set({ sessions, isLoading: false });
-    } catch (err) {
-      set({
-        isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to load interview sessions',
-      });
-    }
+  fetchSessions: async (options) => {
+    const { force = false } = options ?? {};
+    const state = get();
+    if (state.isLoading) return fetchSessionsPromise ?? undefined;
+    if (state.hasFetched && !force) return;
+
+    const myGeneration = ++fetchGeneration;
+
+    fetchSessionsPromise = (async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const sessions = await interviewApi.fetchSessions();
+        if (fetchGeneration !== myGeneration) return;
+        set({ sessions, isLoading: false, hasFetched: true });
+      } catch (err) {
+        if (fetchGeneration !== myGeneration) return;
+        set({
+          isLoading: false,
+          error: err instanceof Error ? err.message : 'Failed to load interview sessions',
+        });
+      } finally {
+        if (fetchGeneration === myGeneration) {
+          fetchSessionsPromise = null;
+        }
+      }
+    })();
+
+    return fetchSessionsPromise;
   },
 
   fetchSession: async (id: string) => {
     set({ isLoading: true, error: null, feedback: null, overallScore: null });
     try {
       const session = await interviewApi.fetchSession(id);
-      const answers: Record<string, string> = {};
+      let answers: Record<string, string> = {};
       if (session.responses) {
         try {
           const parsed = JSON.parse(session.responses) as UserAnswer[];
           for (const a of parsed) {
             answers[a.questionId] = a.answer;
           }
-        } catch {}
+        } catch {
+          answers = {};
+        }
       }
       set({ currentSession: session, currentAnswers: answers, isLoading: false });
     } catch (err) {
@@ -82,7 +110,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     try {
       const session = await interviewApi.generateInterview(params);
       set({ isGenerating: false });
-      await get().fetchSessions();
+      await get().fetchSessions({ force: true });
       toast.success('Interview session created');
       return session;
     } catch (err) {
@@ -159,3 +187,20 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+export function resetInterviewStore() {
+  fetchGeneration++;
+  fetchSessionsPromise = null;
+  useInterviewStore.setState({
+    sessions: [],
+    currentSession: null,
+    currentAnswers: {},
+    feedback: null,
+    overallScore: null,
+    isLoading: false,
+    hasFetched: false,
+    isGenerating: false,
+    isScoring: false,
+    error: null,
+  });
+}

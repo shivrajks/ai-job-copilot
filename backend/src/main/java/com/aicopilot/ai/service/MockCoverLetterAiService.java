@@ -28,7 +28,7 @@ public class MockCoverLetterAiService implements CoverLetterAiService {
 
         try {
             JsonNode resume = MAPPER.readTree(resumeJson);
-            JsonNode jd = MAPPER.readTree(jdJson);
+            JsonNode jd = jdJson != null ? MAPPER.readTree(jdJson) : MAPPER.createObjectNode();
 
             String name = extractField(resume, "personalInfo", "fullName", "Candidate");
             String role = extractField(jd, "basicInfo", "title", "the role");
@@ -147,7 +147,9 @@ public class MockCoverLetterAiService implements CoverLetterAiService {
                     && !root.get(parent).get(field).isNull()) {
                 return root.get(parent).get(field).asText();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            return fallback;
+        }
         return fallback;
     }
 }

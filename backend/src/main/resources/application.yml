@@ -113,6 +113,9 @@ resume:
 
 # Actuator
 management:
+  health:
+    mail:
+      enabled: ${MAIL_HEALTH_ENABLED:false}
   endpoints:
     web:
       exposure:

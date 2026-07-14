@@ -37,6 +37,22 @@ logs/
 *.log
 npm-debug.log*
 
+# Browser/test artifacts
+playwright-report/
+test-results/
+.playwright/
+.cypress/
+cypress/videos/
+cypress/screenshots/
+chrome-profile/
+browser-profile/
+
+# Local screenshots and captures
+qa-screenshots/
+local-screenshots/
+*.har
+*.trace
+
 # Build outputs
 .next/
 out/
@@ -50,6 +66,16 @@ out/
 
 # Runtime data (user file uploads)
 uploads/
+test-uploads/
+uploads-test/
+
+# Database dumps/local databases
+*.dump
+*.backup
+*.sql.gz
+*.sqlite
+*.sqlite3
+*.db
 
 # Local config
 application-local.yml

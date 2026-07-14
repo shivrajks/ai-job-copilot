@@ -33,7 +33,7 @@ export function InterviewQuestionCard({
       transition={{ duration: 0.3 }}
       className={cn(
         'rounded-lg border transition-colors overflow-hidden',
-        isActive ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'
+        isActive ? 'border-primary/30 bg-primary/5' : 'border-white/[0.10] bg-card'
       )}
     >
       <div className="p-4 space-y-3">

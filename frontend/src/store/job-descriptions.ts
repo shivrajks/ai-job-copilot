@@ -8,14 +8,22 @@ import type {
 } from '@/types/job-description';
 import * as jobDescriptionApi from '@/lib/api/job-descriptions';
 
+interface FetchOptions {
+  force?: boolean;
+}
+
+let fetchGeneration = 0;
+let fetchJobDescriptionsPromise: Promise<void> | null = null;
+
 interface JobDescriptionState {
   jobDescriptions: JobDescriptionListItem[];
   selectedJobDescription: JobDescriptionDetail | null;
   isLoading: boolean;
+  hasFetched: boolean;
   isAnalyzing: boolean;
   error: string | null;
 
-  fetchJobDescriptions: () => Promise<void>;
+  fetchJobDescriptions: (options?: FetchOptions) => Promise<void>;
   getJobDescription: (id: string) => Promise<JobDescriptionDetail>;
   createJobDescription: (data: CreateJobDescriptionRequest) => Promise<JobDescriptionDetail>;
   updateJobDescription: (id: string, data: UpdateJobDescriptionRequest) => Promise<JobDescriptionDetail>;
@@ -28,20 +36,38 @@ export const useJobDescriptionStore = create<JobDescriptionState>((set, get) => 
   jobDescriptions: [],
   selectedJobDescription: null,
   isLoading: false,
+  hasFetched: false,
   isAnalyzing: false,
   error: null,
 
-  fetchJobDescriptions: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const jobDescriptions = await jobDescriptionApi.fetchJobDescriptions();
-      set({ jobDescriptions, isLoading: false });
-    } catch (err) {
-      set({
-        isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to load job descriptions',
-      });
-    }
+  fetchJobDescriptions: async (options) => {
+    const { force = false } = options ?? {};
+    const state = get();
+    if (state.isLoading) return fetchJobDescriptionsPromise ?? undefined;
+    if (state.hasFetched && !force) return;
+
+    const myGeneration = ++fetchGeneration;
+
+    fetchJobDescriptionsPromise = (async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const jobDescriptions = await jobDescriptionApi.fetchJobDescriptions();
+        if (fetchGeneration !== myGeneration) return;
+        set({ jobDescriptions, isLoading: false, hasFetched: true });
+      } catch (err) {
+        if (fetchGeneration !== myGeneration) return;
+        set({
+          isLoading: false,
+          error: err instanceof Error ? err.message : 'Failed to load job descriptions',
+        });
+      } finally {
+        if (fetchGeneration === myGeneration) {
+          fetchJobDescriptionsPromise = null;
+        }
+      }
+    })();
+
+    return fetchJobDescriptionsPromise;
   },
 
   getJobDescription: async (id: string) => {
@@ -62,8 +88,23 @@ export const useJobDescriptionStore = create<JobDescriptionState>((set, get) => 
     set({ isLoading: true, error: null });
     try {
       const jd = await jobDescriptionApi.createJobDescription(data);
-      await get().fetchJobDescriptions();
-      set({ isLoading: false });
+      set((state) => ({
+        isLoading: false,
+        jobDescriptions: state.hasFetched
+          ? [
+              {
+                id: jd.id,
+                title: jd.title,
+                company: jd.company,
+                sourceUrl: jd.sourceUrl,
+                matchScore: jd.matchScore,
+                analysisStatus: jd.analysisStatus,
+                createdAt: jd.createdAt,
+              },
+              ...state.jobDescriptions,
+            ]
+          : state.jobDescriptions,
+      }));
       toast.success('Job description added');
       return jd;
     } catch (err) {
@@ -141,3 +182,16 @@ export const useJobDescriptionStore = create<JobDescriptionState>((set, get) => 
 
   clearError: () => set({ error: null }),
 }));
+
+export function resetJobDescriptionStore() {
+  fetchGeneration++;
+  fetchJobDescriptionsPromise = null;
+  useJobDescriptionStore.setState({
+    jobDescriptions: [],
+    selectedJobDescription: null,
+    isLoading: false,
+    hasFetched: false,
+    isAnalyzing: false,
+    error: null,
+  });
+}

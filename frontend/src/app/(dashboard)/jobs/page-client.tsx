@@ -40,7 +40,7 @@ export default function JobsPageClient() {
   const [deletePending, setDeletePending] = useState(false);
 
   const handleRefresh = useCallback(() => {
-    fetchJobDescriptions();
+    fetchJobDescriptions({ force: true });
   }, [fetchJobDescriptions]);
 
   const [searchQuery, setSearchQuery] = useState('');

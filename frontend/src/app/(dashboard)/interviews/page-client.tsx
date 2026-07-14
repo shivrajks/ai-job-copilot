@@ -96,7 +96,9 @@ export default function InterviewsPageClient() {
     try {
       const parsed = JSON.parse(selectedSession.questions);
       questions = parsed.questions || [];
-    } catch {}
+    } catch {
+      questions = [];
+    }
   }
 
   const showFeedback = feedback && feedback.length > 0;
@@ -135,7 +137,7 @@ export default function InterviewsPageClient() {
               <ErrorState
                 title="Failed to load sessions"
                 message={error}
-                onRetry={fetchSessions}
+                onRetry={() => fetchSessions({ force: true })}
               />
             )}
 
@@ -227,7 +229,7 @@ export default function InterviewsPageClient() {
           )}
 
           {!selectedSession && !isGenerating && !showFeedback && (
-            <div className="flex items-center justify-center h-64 rounded-lg border border-dashed border-border">
+            <div className="flex items-center justify-center h-64 rounded-xl border border-dashed border-border glass">
               <div className="text-center">
                 <Mic className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">

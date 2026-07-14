@@ -61,7 +61,7 @@ export function InterviewFeedbackView({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: idx * 0.05 }}
-            className="rounded-lg border border-border bg-card overflow-hidden"
+            className="rounded-lg border border-white/[0.10] bg-card overflow-hidden"
           >
             <div className="p-4 space-y-4">
               <div className="flex items-start justify-between gap-3">

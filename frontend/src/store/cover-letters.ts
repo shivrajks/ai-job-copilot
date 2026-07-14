@@ -10,16 +10,25 @@ import type {
 } from '@/types/cover-letter';
 import * as coverLetterApi from '@/lib/api/cover-letters';
 
+interface FetchOptions {
+  force?: boolean;
+}
+
+let fetchGeneration = 0;
+let fetchCoverLettersPromise: Promise<void> | null = null;
+
 interface CoverLetterState {
   coverLetters: CoverLetterListItem[];
   currentLetter: CoverLetterDetail | null;
   proposal: CoverLetterProposal | null;
   isLoading: boolean;
+  hasFetched: boolean;
   isGenerating: boolean;
   isSaving: boolean;
   error: string | null;
+  generateError: string | null;
 
-  fetchCoverLetters: () => Promise<void>;
+  fetchCoverLetters: (options?: FetchOptions) => Promise<void>;
   fetchCoverLetter: (id: string) => Promise<void>;
   generateProposal: (params: GenerateCoverLetterRequest) => Promise<CoverLetterProposal>;
   saveCoverLetter: (data: SaveCoverLetterRequest) => Promise<CoverLetterDetail>;
@@ -27,6 +36,7 @@ interface CoverLetterState {
   deleteCoverLetter: (id: string) => Promise<void>;
   clearProposal: () => void;
   clearError: () => void;
+  clearGenerateError: () => void;
 }
 
 export const useCoverLetterStore = create<CoverLetterState>((set, get) => ({
@@ -34,21 +44,40 @@ export const useCoverLetterStore = create<CoverLetterState>((set, get) => ({
   currentLetter: null,
   proposal: null,
   isLoading: false,
+  hasFetched: false,
   isGenerating: false,
   isSaving: false,
   error: null,
+  generateError: null,
 
-  fetchCoverLetters: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const coverLetters = await coverLetterApi.fetchCoverLetters();
-      set({ coverLetters, isLoading: false });
-    } catch (err) {
-      set({
-        isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to load cover letters',
-      });
-    }
+  fetchCoverLetters: async (options) => {
+    const { force = false } = options ?? {};
+    const state = get();
+    if (state.isLoading) return fetchCoverLettersPromise ?? undefined;
+    if (state.hasFetched && !force) return;
+
+    const myGeneration = ++fetchGeneration;
+
+    fetchCoverLettersPromise = (async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const coverLetters = await coverLetterApi.fetchCoverLetters();
+        if (fetchGeneration !== myGeneration) return;
+        set({ coverLetters, isLoading: false, hasFetched: true });
+      } catch (err) {
+        if (fetchGeneration !== myGeneration) return;
+        set({
+          isLoading: false,
+          error: err instanceof Error ? err.message : 'Failed to load cover letters',
+        });
+      } finally {
+        if (fetchGeneration === myGeneration) {
+          fetchCoverLettersPromise = null;
+        }
+      }
+    })();
+
+    return fetchCoverLettersPromise;
   },
 
   fetchCoverLetter: async (id: string) => {
@@ -65,7 +94,7 @@ export const useCoverLetterStore = create<CoverLetterState>((set, get) => ({
   },
 
   generateProposal: async (params: GenerateCoverLetterRequest) => {
-    set({ isGenerating: true, error: null, proposal: null });
+    set({ isGenerating: true, generateError: null, proposal: null });
     try {
       const proposal = await coverLetterApi.generateCoverLetter(params);
       set({ proposal, isGenerating: false });
@@ -73,7 +102,7 @@ export const useCoverLetterStore = create<CoverLetterState>((set, get) => ({
     } catch (err) {
       set({
         isGenerating: false,
-        error: err instanceof Error ? err.message : 'Failed to generate cover letter',
+        generateError: err instanceof Error ? err.message : 'Failed to generate cover letter',
       });
       throw err;
     }
@@ -83,8 +112,25 @@ export const useCoverLetterStore = create<CoverLetterState>((set, get) => ({
     set({ isSaving: true, error: null });
     try {
       const detail = await coverLetterApi.saveCoverLetter(data);
-      await get().fetchCoverLetters();
-      set({ isSaving: false });
+      set((state) => ({
+        isSaving: false,
+        currentLetter: detail,
+        coverLetters: state.hasFetched
+          ? [
+              {
+                id: detail.id,
+                title: detail.title,
+                companyName: detail.companyName,
+                tone: detail.tone,
+                template: detail.template,
+                preview: detail.content.length > 120 ? `${detail.content.substring(0, 120).trim()}...` : detail.content,
+                createdAt: detail.createdAt,
+                updatedAt: detail.updatedAt,
+              },
+              ...state.coverLetters,
+            ]
+          : state.coverLetters,
+      }));
       toast.success('Cover letter saved');
       return detail;
     } catch (err) {
@@ -138,7 +184,25 @@ export const useCoverLetterStore = create<CoverLetterState>((set, get) => ({
     }
   },
 
-  clearProposal: () => set({ proposal: null }),
+  clearProposal: () => set({ proposal: null, generateError: null }),
 
   clearError: () => set({ error: null }),
+
+  clearGenerateError: () => set({ generateError: null }),
 }));
+
+export function resetCoverLetterStore() {
+  fetchGeneration++;
+  fetchCoverLettersPromise = null;
+  useCoverLetterStore.setState({
+    coverLetters: [],
+    currentLetter: null,
+    proposal: null,
+    isLoading: false,
+    hasFetched: false,
+    isGenerating: false,
+    isSaving: false,
+    error: null,
+    generateError: null,
+  });
+}

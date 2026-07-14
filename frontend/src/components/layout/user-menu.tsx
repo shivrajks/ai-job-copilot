@@ -55,7 +55,7 @@ export function UserMenu() {
             exit={{ opacity: 0, y: -4, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              'absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-card shadow-xl',
+              'absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.10] bg-card/95 backdrop-blur-xl shadow-xl',
               'z-50 overflow-hidden'
             )}
             role="menu"
@@ -76,7 +76,7 @@ export function UserMenu() {
                 Settings
               </button>
               <button
-                onClick={() => { setOpen(false); logout(); }}
+                onClick={() => { setOpen(false); logout(); router.replace('/auth/login'); }}
                 className="flex items-center gap-3 px-3 py-2 text-sm rounded-lg w-full text-left text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                 role="menuitem"
               >
